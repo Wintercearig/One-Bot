@@ -22,6 +22,34 @@ function formattedDate() {
   return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
+async function getCategoryDescription(category) {
+  const categoryLower = category.toLowerCase();
+  switch (categoryLower) {
+    case 'admin':
+      return 'Take charge. Command your server with precision. Manage settings, enforce policies, and ensure smooth operation. Admin controls for ultimate authority.';
+    case 'economy':
+      return 'Keep the money flowing. Manage your virtual currency, earn rewards, and engage in economic activities to enhance the interactive and dynamic experience.';
+    case 'games':
+      return 'Dive into the world of fun and entertainment. Enjoy various interactive and engaging games, including classics and unique experiences, to have a great time with fellow server members.';
+    case 'giveaway':
+      return 'Join the excitement! Win awesome prizes, participate in generous giveaways, and celebrate victories with fellow server members. Your chance to claim fantastic rewards awaits!';
+    case 'info':
+      return 'Discover server insights, user details, and valuable information. Use commands to check server status and access helpful details.';
+    case 'level':
+      return 'Climb the ranks! Engage in activities, earn experience, and level up. Show off your achievements, compete with server members, and unlock new perks. Elevate your status and enjoy the journey in the Level category!';
+    case 'moderation':
+      return ' Maintain order effortlessly. Access powerful tools to manage members and ensure a harmonious server environment. Empower yourself with moderation commands for effective server management.';
+    case 'music':
+      return 'Groove to the beat! Enjoy melodies, play, skip, and control tunes. Share your favorite tracks with fellow server members in the Music category!';
+    case 'tickets':
+      return 'Swift support! Manage tickets for efficient issue resolution. Enhance your server support experience with the Tickets category!';
+    case 'Util':
+      return 'Handy utilities at your fingertips. Explore commands for various tasks, ensuring convenience and efficiency. Simplify server management with the Util category';
+    default:
+      return 'No category description available.';
+  }
+}
+
 async function addCase(guildId, userId, moderator, action, reason) {
   try {
     // Find the guild's document or create a new one if it doesn't exist
@@ -94,7 +122,6 @@ async function getLatestCaseNumber(guildId, userId) {
   return latestCaseNumber;
 }
 
-
 async function getUserById(userId) {
   try {
     let user = await User.findOne({ user_id: userId });
@@ -111,6 +138,9 @@ async function getUserById(userId) {
   } catch (e) {
     console.error(e);
   }
+}
+async function checkUserPermissions(member, requiredPermissions) {
+	return requiredPermissions.every(permission => member.hasPermission(permission));
 }
 
 async function addUser(userId) {
@@ -445,9 +475,11 @@ function encode(obj) {
 */
 
 module.exports = {
+  getCategoryDescription,
   toCapitalize,
   calculateUserXp,
   getUserById,
+  checkUserPermissions,
   addGuild,
   addUser,
   removeUser,

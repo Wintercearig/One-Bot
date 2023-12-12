@@ -1,22 +1,15 @@
 /* eslint-disable no-unused-vars */
 // eslint-disable-next-line no-unused-vars
 require('dotenv').config();
-const {
-	getGuildById,
-	getUserById,
-	updateUserById,
-	errorEmbed,
-	calculateUserXp,
-	findOrCreateMutedRole
-} = require('../../utils/functions');
-const { EmbedBuilder } = require("discord.js");
-const BotModel = require('../../../models/Bot.model');
-const UserModel = require('../../../models/User.model');
+const { EmbedBuilder } = require("discord.js"),
+BotModel = require('../../../models/Bot.model'),
+UserModel = require('../../../models/User.model'),
+Guild = require('../../../models/Guild.model');
 
 module.exports = async (client, message) => {
 	const guildId = message.guild.id;
 	const userId = message.author.id;
-	const guild = await getGuildById(guildId);
+	const guild = await client.getGuildById(guildId);
 	const mentions = message.mentions.members;
 
 	if (message.content === `<@${client.user.id}>`) {
@@ -37,7 +30,7 @@ module.exports = async (client, message) => {
 
 		return message.channel.send({ embeds: [prefixing] }).then((sentMessage) => {
 			message.delete();
-			setTimeout(() => sentMessage.delete(), 15000); // 10 seconds
+			setTimeout(() => sentMessage.delete(), 15000);
 		});
 	}
 
@@ -52,7 +45,6 @@ module.exports = async (client, message) => {
 	}
 
 	if (message.author.bot || message.channel.type === "dm" || !message.content.startsWith(prefix)) return;
-
 
 	const args = message.content
 		.slice(prefix.length)
@@ -86,7 +78,7 @@ module.exports = async (client, message) => {
 				.map(a => `<${a}>`)
 				.join(' ')}`;
 
-			const embed = EmbedBuilder()
+			const embed = new EmbedBuilder()
 				.setTitle('Incorrect command usage')
 				.setColor('RED')
 				.setDescription(`:x: | You must provide more args: ${cmdArgs}`)
@@ -104,23 +96,32 @@ module.exports = async (client, message) => {
 			});
 
 			if (neededPermissions[0]) {
-				return message.channel.send({ embeds: [errorEmbed(neededPermissions, message)]});
+				return message.channel.send({ embeds: [client.errorEmbed(neededPermissions, message)]});
 			}
 		}
 
-		if (cmd.memberPermissions) {
+		if (guild.customPerms && guild.customPerms[cmd.name]) {
+			const neededPermissions = []; guild.customPerms[cmd.name];
+
+			if(!message.member.permissions.has(neededPermissions)){
+				return message.channel.send({content: 
+					`You need: ${neededPermissions
+					.map(p => `\`${p.toUpperCase()}\``)
+					.join(', ')} permissions to use this command!`});
+			}
+		} else if (cmd.memberPermissions) {
 			const neededPermissions = [];
 			cmd.memberPermissions.forEach(perm => {
-				if (!message.channel.permissionsFor(message.member).has(perm)) {
+				if (!message.member.permissions.has(perm)) {
 					neededPermissions.push(perm);
 				}
 			});
 
 			if (neededPermissions.length > 0) {
-				return message.channel.send(
+				return message.channel.send({content:
 					`You need: ${neededPermissions
-						.map(p => `\`${p.toUpperCase()}\``)
-						.join(', ')} permissions to use this command!`
+					.map(p => `\`${p.toUpperCase()}\``)
+					.join(', ')} permissions to use this command!`}
 				).then(m => {
 					setTimeout(() => {
 						m.delete().catch(console.error);
@@ -140,3 +141,4 @@ module.exports = async (client, message) => {
 		return;
 	}
 };
+

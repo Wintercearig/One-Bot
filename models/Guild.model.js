@@ -5,7 +5,6 @@ const guildSchema = new Schema({
   prefix: { type: String, default: "-" },
   // store: { type: Array, default: null },
   // blacklistedwords: { type: Array, default: [] },
-  // staff_notifier: { type: Boolean, default: false },
   // disabled_commands: { type: Array, default: [] },
   // disabled_categories: { type: Array, default: [] },
   // panel_chan_id: { type: String, default: null },

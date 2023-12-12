@@ -5,9 +5,114 @@
 2- Go to GitHub and submit a pull request to have your branch merged with Main
 
 3- Pull from Main into Your_Branch periodically to stay up to date with Main Branch
+-----------------------------------------------------------------------------------------------------
+Probably Useful
+
+-Slash CMD Localization Stuff
+id	Indonesian	        Bahasa Indonesia
+da	Danish	                Dansk
+de	German	                Deutsch
+en-GB	English, UK	        English, UK
+en-US	English, US	        English, US
+es-ES	Spanish	                Español
+fr	French	                Français
+hr	Croatian	        Hrvatski
+it	Italian	                Italiano
+lt	Lithuanian	        Lietuviškai
+hu	Hungarian	        Magyar
+nl	Dutch	                Nederlands
+no	Norwegian	        Norsk
+pl	Polish	                Polski
+pt-BR	Portuguese, Brazilian	Português do Brasil
+ro	Romanian, Romania	Română
+fi	Finnish	                Suomi
+sv-SE	Swedish	                Svenska
+vi	Vietnamese	        Tiếng Việt
+tr	Turkish	                Türkçe
+cs	Czech	                Čeština
+el	Greek	                Ελληνικά
+bg	Bulgarian	        български
+ru	Russian	                Pусский
+uk	Ukrainian	        Українська
+hi	Hindi	                हिन्दी
+th	Thai	                ไทย
+zh-CN	Chinese, China	        中文
+ja	Japanese	        日本語
+zh-TW	Chinese, Taiwan	        繁體中文
+ko	Korean	                한국어
+
+.setNameLocalizations({
+	pl: 'pies',
+	de: 'hund',
+})
+.setDescriptionLocalizations({
+	pl: 'Słodkie zdjęcie pieska!',
+	de: 'Poste ein niedliches Hundebild!',
+})
+
+- Discord Permissions List
+    const validPermissions = 
+    (46) [
+    'CreateInstantInvite', 'KickMembers', 'BanMembers', 
+    'Administrator', 'ManageChannels', 'ManageGuild', 
+    'AddReactions', 'ViewAuditLog', 'PrioritySpeaker', 
+    'Stream', 'ViewChannel', 'SendMessages', 
+    'SendTTSMessages', 'ManageMessages', 'EmbedLinks', 
+    'AttachFiles', 'ReadMessageHistory', 'MentionEveryone', 
+    'UseExternalEmojis', 'ViewGuildInsights', 'Connect', 
+    'Speak', 'MuteMembers', 'DeafenMembers', 
+    'MoveMembers', 'UseVAD', 'ChangeNickname', 
+    'ManageNicknames', 'ManageRoles', 'ManageWebhooks', 
+    'ManageEmojisAndStickers', 'ManageGuildExpressions', 'UseApplicationCommands', 
+    'RequestToSpeak', 'ManageEvents', 'ManageThreads', 
+    'CreatePublicThreads', 'CreatePrivateThreads', 'UseExternalStickers', 
+    'SendMessagesInThreads', 'UseEmbeddedActivities', 'ModerateMembers', 
+    'ViewCreatorMonetizationAnalytics', 'UseSoundboard', 'UseExternalSounds', 
+    'SendVoiceMessages'
+];
+- C:\Recovery\OEM\Wimage\Skin\icons for icons
+- Auto delete message after certain amount of time
+.then(m => {
+          setTimeout(() => {
+              m.delete().catch(console.error);
+          }, 10000); 
+      });
+
+- Collector Stuff
+collector.stop()
+collector.resetTimer()
+      filter = (interaction) => {
+        return (
+          (interaction.isButton() || interaction.isStringSelectMenu()) &&
+          interaction.user.id === message.author.id 
+        );
+      };
+or just filter: message.user.id === message.author.id, vice versa
+
+- Example of cool thing for recognizing Best Match of something (Found in help.js)
+
+        const stringSimilarity = require('string-similarity');
+
+        let allCommands = client.commands.map(cmd => cmd.name.toLowerCase()),
+        { bestMatch } = stringSimilarity.findBestMatch(input.toLowerCase(), allCommands),
+        closestMatch = bestMatch.target,
+        similarityScore = bestMatch.rating;
+      
+        let info = `If you see this, something legit ain't right. Contact the bot dev asap: fluffydreams.`;
+      
+        info = similarityScore > 0.5
+        ? `It appears that I don't have this command\nDid you mean: \`${settings.prefix}${closestMatch}\` ?`
+        : `It appears my algorithm doesn't believe this, or a similar, command exists.\nCheck your spelling or run the \`${settings.prefix}help\` command`;
+      
+        return message.channel.send({embeds: [embed.setColor('#ff0000').setDescription(info)]});
+
+- Dupes
+        To avoid Duplicates and put into array, example is:
+        const input = [...new Set(client.commands.map(cmd => cmd.category))];
+        "new Set()" filters out duplicate values, leaving only unique values. Without "new Set()"
+        the output of input could be ['admin', 'utility', 'admin', 'fun', 'utility']
 
 -----------------------------------------------------------------------------------------------------
-These serve as Safe Guards.
 
         This code calculates the input number, (Decimal Number)
         and does the necessary calculations with divisionResult
@@ -37,3 +142,5 @@ prefix = "-"
 token = "your bot token"
 mongoDB = "your mongodb connection"
 theme = "#9fe3ed"
+owners = "your user id", "someone elses", "or another", "and another", "and yet another"
+supportServer = "https://discord.gg/z3fYrfhjb5"

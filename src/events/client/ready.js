@@ -1,6 +1,5 @@
-require('dotenv').config()
+require('dotenv').config();
 const { ActivityType } = require('discord.js');
-
 
 module.exports = client => {
     console.log(`${client.user.tag} is now online!`);
@@ -10,7 +9,7 @@ module.exports = client => {
       `@ me for prefix`,
       `${process.env.prefix}help for more info`    
     ];
-    client.user.setPresence({status: 'idle'});
+    // client.user.setPresence({status: 'online'});
       setInterval(() => {
         const activityIndex = Math.floor(Math.random() * (activities_list.length));
         client.user.setActivity(activities_list[activityIndex], { type: ActivityType.Watching });

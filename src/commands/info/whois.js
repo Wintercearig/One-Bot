@@ -11,7 +11,6 @@ module.exports = {
         const user = message.mentions.users.first() || message.author;
         const member = message.guild.members.cache.get(user.id);
         if (!member) {
-            // Handle the case where the member is not found (e.g., user is not in the server)
             return message.channel.send('User not found in this server.');
         }
 
@@ -110,17 +109,6 @@ if (boostDate) {
             year: 'numeric',
           }).format(member.joinedAt);
 
-          const date = new Date();
-          const options = {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            timeZoneName: 'long'
-          };
-
         let presenceStatus; // Default value if no activity is found
 
         if (member.presence && member.presence.activities && member.presence.activities.length > 0) {
@@ -129,19 +117,17 @@ if (boostDate) {
             presenceStatus = 'N/A';
         }
 
-        const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
         let nickname = member.nickname || "None";
 
-        const maxRolesToShow = 15;
         const userRoles = [...member.roles.cache
         .filter(role => role.name !== '@everyone') // Exclude @everyone role
         .values()];
-        const rolesToDisplay = userRoles.slice(0, maxRolesToShow);
+        const rolesToDisplay = userRoles.slice(0, 15);
         const roleCount = userRoles.length;
         const rolesField = {
-            name: roleCount > maxRolesToShow ? `Roles [${maxRolesToShow} - ${roleCount}]` : `Roles [${roleCount}]`,
-            value: roleCount > maxRolesToShow
-                ? rolesToDisplay.join(', ') + `\n...and ${roleCount - maxRolesToShow} more`
+            name: roleCount > 15 ? `Roles [${15} - ${roleCount}]` : `Roles [${roleCount}]`,
+            value: roleCount > 15
+                ? rolesToDisplay.join(', ') + `\n...and ${roleCount - 15} more`
                 : rolesToDisplay.join(', ') || 'None'
         };
 
@@ -152,7 +138,7 @@ if (boostDate) {
                 name: `${user.tag} (${member.user.bot ? 'Bot' : member.id === message.guild.ownerId ? 'Server Owner' : member.roles.cache.some(role => role.permissions.has([PermissionsBitField.Flags.Administrator])) ? 'Admin' : 'Member'})`,
                 iconURL: member.presence && member.presence.status ? statusType[member.presence.status] : statusType.offline
             })
-            .setFooter({text: `${formattedDate}`})
+            .setTimestamp()
             .addFields(
                 { name: `ID`, value: user.id },
                 { name: `Nickname`, value: nickname, inline: true },
@@ -162,10 +148,9 @@ if (boostDate) {
                 { name: `Highest Role`, value: member.roles.highest.id === message.guild.id ? 'None' : member.roles.highest.name, inline: true },
                 { name: `Hoist Role`, value: member.roles.hoist ? `<@&${member.roles.hoist.id}>` : 'None', inline: true },
                 rolesField
-    
             );
+            
             if (!member.user.bot) {
-                
                 uinfoembed.addFields(
                     { name: `Server Booster`, value: boostInfo, inline: true },
                 );

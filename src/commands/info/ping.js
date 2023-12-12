@@ -1,31 +1,50 @@
 const { EmbedBuilder } = require("discord.js");
+const fetch = require('node-fetch');
 
 require('dotenv').config();
 module.exports = {
     name: 'ping',
     description: 'Check the bot and API latency.',
+    aliases: ['pong'],
     category: 'info',
     run: async (client, message) => {
-      // Calculate the round-trip latency (ping) between the bot and the user
       let circles = {
-        green: "🟢",
-        yellow: "🟡",
-        red: "🔴"
+        green: "<:WifiGood:1174279497705590794>",
+        yellow: "<:WifiMid:1174279484053135370>",
+        red: "<:WifiBad:1174279464667066378>"
     };
-    const msg = await message.channel.send(`🏓 Pinging....`);
-    let ping = msg.createdTimestamp - message.createdTimestamp;
-    let formattedDate = client.formattedDate();
+
+    const [botLatency, apiLatency] = await Promise.all([
+      measureLatency(() => { }),
+      measureLatency(() => fetch("https://discord.com/api/users/@me"))
+    ]);
+
+    const pingMsg = await message.channel.send('Pinging...');
+    const gatewayLatency = client.ws.ping === -1 ? "N/A" : client.ws.ping;
 
     let pembed = new EmbedBuilder()
       .setColor(`${process.env.theme}`)
-      .setTitle("🏓 Pong!")
-      .setThumbnail(message.guild.iconURL({ dynamic: true, size: 512 }))
-      .setDescription(`${client.ws.ping <= 200 ? circles.green : client.ws.ping <= 400 ? circles.yellow : circles.red} **| :** ${client.ws.ping}ms\n\n` +
-      `\n${ping <= 200 ? circles.green : ping <= 400 ? circles.yellow : circles.red} **| RoundTrip:** ${ping} ms`)
-      .setTimestamp()
-      .setFooter({text: `${formattedDate}`});
-  
-      msg.edit({ content: '', embeds:[pembed] }).catch(console.error);
+      .setDescription(
+        `Bot Latency: ${formatLatency(botLatency, circles)}
+        Discord API: ${formatLatency(apiLatency, circles)}
+        Heartbeat: ${formatLatency(gatewayLatency, circles)}`
+      )
+      .setTimestamp();
+      await pingMsg.edit({ content: '', embeds:[pembed] }).catch(console.error);
   },
 };
-  
+async function measureLatency(action) {
+    const start = Date.now();
+    await action();
+    const end = Date.now();
+    const latency = end - start;
+    return latency;
+}
+
+function formatLatency(latency, circles) {
+  if (latency === "N/A"){
+    return `\`N/A\``;
+  } else {
+    return `${latency <= 120 ? circles.green : latency <= 200 ? circles.yellow : circles.red} \`${latency}ms\``;
+  }
+}

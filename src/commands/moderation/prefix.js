@@ -4,7 +4,7 @@ require('dotenv').config();
 module.exports = {
     name: 'prefix',
     description: 'Sets the prefix for this server.',
-    usage: `prefix <newPrefix>`,
+    usage: `prefix [newPrefix]`,
     category: "moderation",
     run: async (client, message, args) => {
         message.delete();
