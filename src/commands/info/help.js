@@ -93,10 +93,11 @@ async function helpMSG(client, message) {
         .addComponents(select),
     HelpEmbed = new EmbedBuilder()
         .setColor(`${process.env.theme}`)
-        .setTitle(`<:OneBotPFP:1175958595624517632> ${client.user.username} Help Desk`)
+        .setTitle(`${client.user.username} Help Desk`)
         .setTimestamp()
         .setThumbnail(client.user.avatarURL({dynamic: true, size: 1024}))
-        .setDescription(`\`${settings.prefix}help [command/category]\` - To view specific command/category.
+        .setDescription(`\`${settings.prefix}help [command/category]\` - To view a specific command/category.
+        ${settings.prefix}help /[command] or /[category]\` - To view a specific slash commands/category.
         Use dropdown menu for more info.` + '```ansi\n' + '[2;34m[][0m - [2;31mRequired Argument[0m | [2;34m()[0m - [2;31mOptional Argument[0m[2;36m[0m```')
         .addFields(
             { 
@@ -120,21 +121,20 @@ async function helpMSG(client, message) {
           }),
     CmdList = new EmbedBuilder()
         .setColor(`${process.env.theme}`)
-        .setTitle(`<:OneBotPFP:1175958595624517632> ${client.user.username} Msg Commands List`)
+        .setTitle(`${client.user.username} Msg Commands List`)
         .setTimestamp()
         .setThumbnail(client.user.avatarURL({dynamic: true, size: 1024}))
-        .setDescription(`\`${settings.prefix}help [command/category]\` - To view specific command/category.
-          Use dropdown menu for more info.` + '```ansi\n' + '[2;34m[][0m - [2;31mRequired Argument[0m | [2;34m()[0m - [2;31mOptional Argument[0m[2;36m[0m```')
+        .setDescription(`\`${settings.prefix}help [command/category]\` - To view a specific command/category.` + '```ansi\n' + '[2;34m[][0m - [2;31mRequired Argument[0m | [2;34m()[0m - [2;31mOptional Argument[0m[2;36m[0m```')
           .setFooter({
             text: message.author.username,
             iconURL: message.author.displayAvatarURL({ dynamic: true, size: 512 }),
           }),
     slashCmdList = new EmbedBuilder()
         .setColor(`${process.env.theme}`)
-        .setTitle(`<:OneBotPFP:1175958595624517632> ${client.user.username} Slash Commands List`)
+        .setTitle(`${client.user.username} Slash Commands List`)
         .setTimestamp()
         .setThumbnail(client.user.avatarURL({ dynamic: true, size: 1024 }))
-        .setDescription('List of available slash commands.')
+        .setDescription(`\`${settings.prefix}help /[command] or /[category]\` - To view a specific slash command/category.`)
         .setFooter({
             text: message.author.username,
             iconURL: message.author.displayAvatarURL({ dynamic: true, size: 512 }),
@@ -267,26 +267,37 @@ async function helpMSG(client, message) {
 
   async function getCMD(client, message, input) {
       let embed = new EmbedBuilder(),
-      category = client.categories.find(cat => cat.toLowerCase() === input.toLowerCase()),
+      msgCategory = client.categories.find(cat => cat.toLowerCase() === input.toLowerCase()),
+      slashCategory = client.slashCategories.find(cat => cat.toLowerCase() === input.toLowerCase()),
       settings = await Guild.findOne({
         guild_id: message.guild.id
     });
 
-    if (category) {
-        let commandList = client.commands.filter(cmd => cmd.category === category).map(cmd => `<:arrowLeft:1176011742451597373> \`${settings.prefix}${cmd.name}\` - ${cmd.description}`).join('\n'),
+    if (msgCategory) {
+        let commandList = client.commands.filter(cmd => cmd.category === msgCategory).map(cmd => `<:arrowLeft:1176011742451597373> \`${settings.prefix}${cmd.name}\` - ${cmd.description}`).join('\n'),
         info = `${commandList.length > 0 ? commandList : 'No commands in this category'}`;
         embed
-        .setTitle(`${category.charAt(0).toUpperCase()+ category.slice(1)}`)
+        .setTitle(`${msgCategory.charAt(0).toUpperCase()+ msgCategory.slice(1)}`)
         .setColor(process.env.theme)
         .setFields({ name: 'Commands', value: info });
-          let description = await client.getCategoryDescription(category.toLowerCase());
+          let description = await client.getCategoryDescription(msgCategory.toLowerCase());
           embed.setDescription(description);
         return message.channel.send({ embeds: [embed] });
     }
 
     if (input.startsWith('/')) {
-        const slashCmd = client.slash.get(input.toLowerCase());
-
+        if (slashCategory) {
+            let commandList = client.slash.filter(cmd => cmd.category === slashCategory).map(cmd => `<:arrowLeft:1176011742451597373> \`${settings.prefix}${cmd.name}\` - ${cmd.description}`).join('\n'),
+            info = `${commandList.length > 0 ? commandList : 'No commands in this category'}`;
+            embed
+            .setTitle(`${slashCategory.charAt(0).toUpperCase()+ slashCategory.slice(1)}`)
+            .setColor(process.env.theme)
+            .setFields({ name: 'Commands', value: info });
+              let description = await client.getCategoryDescription(slashCategory.toLowerCase());
+              embed.setDescription(description);
+            return message.channel.send({ embeds: [embed] });
+        }
+        const slashCmd = client.slash.get(input.toLowerCase().replace(/^\//, ''));
         if (!slashCmd){
             let allCommands = client.slash.map(cmd => cmd.data.name.toLowerCase()),
             { bestMatch } = stringSimilarity.findBestMatch(input.toLowerCase(), allCommands),
@@ -302,11 +313,41 @@ async function helpMSG(client, message) {
             return message.channel.send({embeds: [embed.setColor('#ff0000').setDescription(info)]});
         }
 
-        if (slashCmd.data.name) embed.setTitle(`${slashCmd.data.name.charAt(0).toUpperCase() + slashCmd.data.name.slice(1)}`);
-        if (slashCmd.data.description) embed.setDescription(slashCmd.data.description);
-        // pick up on this when i wake up
-        // if(slashCmd.category)
+        if (slashCmd.data.name) {
+            let nameTxt = '/' + slashCmd.data.name.charAt(0).toUpperCase() + slashCmd.data.name.slice(1);
+            if (slashCmd.category) {
+                nameTxt = `[${slashCmd.category.charAt(0).toUpperCase() + slashCmd.category.slice(1)}]` + `-${nameTxt}`;
+            }
+            embed.setTitle(nameTxt);
+        }
 
+        if (slashCmd.data.description) embed.setDescription(slashCmd.data.description);
+        if (slashCmd.usage) {
+            embed.addFields({
+              name: '**Usage:**',
+              value: `\`${settings.prefix + slashCmd.usage}\``,
+              inline: true
+            });
+        }
+        if (slashCmd.cooldown) {
+          embed.addFields({
+              name: '**CoolDown:**',
+              value: `\`${slashCmd.cooldown}\``
+          });
+        }
+        if (slashCmd.customMemPerms) {
+            embed.addFields({ 
+                name: `**Member Perms Needed:**`, 
+                value: slashCmd.customMemPerms.map(m => `\`${m}\``).join(', ')});
+        } else if (slashCmd.data.setDefaultMemberPermissions) {
+            embed.addFields({ 
+                name: `**Member Perms Needed:**`, 
+                value: slashCmd.data.setDefaultMemberPermissions.map(m => `\`${m}\``).join(', ')});
+        } 
+        if (slashCmd.botpermissions) embed.addFields({ 
+            name: `**Bot Perms Needed:**`, 
+            alue: slashCmd.botpermissions.map(b => `\`${b}\``).join(', ')});
+        return message.channel.send({embeds: [embed.setColor(process.env.theme)]});
     } else {
         const cmd = client.commands.get(input.toLowerCase()) || client.commands.get(client.aliases.get(input.toLowerCase()));
         if (!cmd) {
@@ -324,10 +365,7 @@ async function helpMSG(client, message) {
           return message.channel.send({embeds: [embed.setColor('#ff0000').setDescription(info)]});
         }
         if (cmd.name) {
-            let nameTxt = cmd.name.charAt(0).toUpperCase() + cmd.name.slice(1);
-            if (cmd.category) {
-                nameTxt = `[${cmd.category.charAt(0).toUpperCase() + cmd.category.slice(1)}]` + `-${nameTxt}`;
-            }
+            let nameTxt = `[${cmd.category.charAt(0).toUpperCase() + cmd.category.slice(1)}]` + `-${cmd.name.charAt(0).toUpperCase() + cmd.name.slice(1)}`;
             embed.setTitle(nameTxt);
         }
         if (cmd.description) {
@@ -338,12 +376,13 @@ async function helpMSG(client, message) {
               '[2;34m[][0m - [2;31mRequired Argument[0m | [2;34m()[0m - [2;31mOptional Argument[0m[2;36m[0m```' +
               '\n\n';
           }
-        
           embed.setDescription(descriptionText);
         }
         if (cmd.aliases) {
           const formattedAliases = cmd.aliases.map(alias => `\`${settings.prefix}${alias}\``);
-          embed.addFields({ name: `**Aliases:**`, value: formattedAliases.join(', ')});
+          embed.addFields({ 
+            name: `**Aliases:**`, 
+            value: formattedAliases.join(', ')});
         }
         if (cmd.usage) {
             embed.addFields({
@@ -358,8 +397,12 @@ async function helpMSG(client, message) {
               value: `\`${cmd.cooldown}\``
           });
         }
-        if (cmd.memberPermissions) embed.addFields({ name: `**Member Perms Needed:**`, value: cmd.memberPermissions.map(m => `\`${m}\``).join(', ')});
-        if (cmd.botpermissions) embed.addFields({ name: `**Bot Perms Needed:**`, value: cmd.botpermissions.map(b => `\`${b}\``).join(', ')});
+        if (cmd.memberPermissions) embed.addFields({ 
+            name: `**Member Perms Needed:**`, 
+            value: cmd.memberPermissions.map(m => `\`${m}\``).join(', ')});
+        if (cmd.botpermissions) embed.addFields({ 
+            name: `**Bot Perms Needed:**`, 
+            value: cmd.botpermissions.map(b => `\`${b}\``).join(', ')});
         return message.channel.send({embeds: [embed.setColor(process.env.theme)]});
     }
   }

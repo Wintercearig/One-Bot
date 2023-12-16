@@ -7,6 +7,7 @@
 3- Pull from Main into Your_Branch periodically to stay up to date with Main Branch
 -----------------------------------------------------------------------------------------------------
 Probably Useful
+https://discord.com/developers/docs/reference
 
 -Slash CMD Localization Stuff
 id	Indonesian	        Bahasa Indonesia
@@ -49,6 +50,7 @@ ko	Korean	                한국어
 	pl: 'Słodkie zdjęcie pieska!',
 	de: 'Poste ein niedliches Hundebild!',
 })
+.setDefaultMemberPermissions()
 
 - Discord Permissions List
     const validPermissions = 
@@ -139,8 +141,8 @@ or just filter: message.user.id === message.author.id, vice versa
 -----------------------------------------------------------------------------------------------------
 # .env File
 prefix = "-"
-token = "your bot token"
-mongoDB = "your mongodb connection"
+token = "bot token"
+mongoDB = "mongodb connection"
 theme = "#9fe3ed"
-owners = "your user id", "someone elses", "or another", "and another", "and yet another"
+owners = "your user id", "someone elses", "or another", "or another", "or yet another"
 supportServer = "https://discord.gg/z3fYrfhjb5"
