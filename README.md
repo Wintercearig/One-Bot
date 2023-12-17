@@ -1,5 +1,6 @@
 # GITHUB
-[![CodeFactor](https://www.codefactor.io/repository/github/Wintercearig/One-Bot/badge)](https://www.codefactor.io/repository/github/Wintercearig/One-Bot)
+[![CodeFactor](https://www.codefactor.io/repository/github/wintercearig/one-bot/badge/main)](https://www.codefactor.io/repository/github/wintercearig/one-bot/overview/main)
+
 1- Commit your changes to your branch.
 
 2- Go to GitHub and submit a pull request to have your branch merged with Main
