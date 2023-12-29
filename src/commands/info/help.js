@@ -25,6 +25,13 @@ module.exports = {
     },
 };
 
+/**
+ * Sends the main help message.
+ * @async
+ * @param {Client} client - The Discord client.
+ * @param {Message} message - The Discord message.
+ */
+
 async function helpMSG(client, message) {
     const previousCollector = interactionCollectors[message.author.id];
 
@@ -97,7 +104,7 @@ async function helpMSG(client, message) {
         .setTimestamp()
         .setThumbnail(client.user.avatarURL({dynamic: true, size: 1024}))
         .setDescription(`\`${settings.prefix}help [command/category]\` - To view a specific command/category.
-        ${settings.prefix}help /[command] or /[category]\` - To view a specific slash commands/category.
+        \`${settings.prefix}help /[command] or /[category]\` - To view a specific slash commands/category.
         Use dropdown menu for more info.` + '```ansi\n' + '[2;34m[][0m - [2;31mRequired Argument[0m | [2;34m()[0m - [2;31mOptional Argument[0m[2;36m[0m```')
         .addFields(
             { 
@@ -264,6 +271,14 @@ async function helpMSG(client, message) {
     });
 
 }
+
+/**
+ * Fetches and displays information about a specific command.
+ * @async
+ * @param {Client} client - The Discord client.
+ * @param {Message} message - The Discord message.
+ * @param {string} input - The command to get information for.
+ */
 
   async function getCMD(client, message, input) {
       let embed = new EmbedBuilder(),

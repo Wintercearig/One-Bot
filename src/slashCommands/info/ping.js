@@ -29,7 +29,7 @@ module.exports = {
       .setDescription(
         `Bot Latency: ${formatLatency(botLatency, circles)}
         Discord API: ${formatLatency(apiLatency, circles)}
-        Discord Gateway: ${formatLatency(gatewayLatency, circles)}`
+        Heartbeat: ${formatLatency(gatewayLatency, circles)}`
       )
       .setTimestamp();
 
