@@ -11,18 +11,18 @@ module.exports = {
     { name, id: guildId } = message.guild,
     guild = await client.getGuildById(guildId),
     prefix = guild.prefix,
-    announceCh = guild.announce_data ? guild.announce_data.channel_id : null,
-    suggestCh = guild.suggest_data ? guild.suggest_data.channel_id : null,
-    welcomeCh = guild.welcome_data ? guild.welcome_data.channel_id : null,
-    leaveCh = guild.leave_data ? guild.leave_data.channel_id : null,
-    levelMsgs = guild.level_data ? guild.level_data.channel_id : null,
-    antiSpam = guild.anti_spam ? guild.anti_spam.enabled : null,
-    logCh = guild.audit_data ? guild.audit_data.channel_id : null,
-    starCh = guild.starboards_data ? guild.starboards_data.channel_id : null,
-    welcRole = guild.welcome_data ? guild.welcome_data.role_id : null,
-    supRole = guild.support_data ? guild.support_data.role_id : null,
-    staffNotify = guild.staff_notifier ? guild.staff_notifier : null,
-    muteRole = guild.muted_role_id ? guild.muted_role_id : null;
+    announceCh = guild.config?.announce_data?.channel_id ?? null,
+    suggestCh = guild.config?.suggest_data?.channel_id ?? null,
+    welcomeCh = guild.config?.welcome_data?.channel_id ?? null,
+    leaveCh = guild.config?.leave_data?.channel_id ?? null,
+    levelMsgs = guild.config?.level_data?.channel_id ?? null,
+    antiSpam = guild.config?.anti_spam?.enabled ?? null,
+    logCh = guild.config?.audit_data?.channel_id ?? null,
+    starCh = guild.config?.starboards_data?.channel_id ?? null,
+    welcRole = guild.config?.welcome_data?.role_id ?? null,
+    supRole = guild.config?.support_data?.role_id ?? null,
+    muteRole = guild.config?.muted_role_id ?? null,
+    musicDj = guild.config?.music_dj?.enabled ?? null;
     
     const embed1 = new EmbedBuilder()
       .setTitle(lang.ADMIN.GUILD_CONFIG.replace("{guildName}", name))
@@ -30,9 +30,8 @@ module.exports = {
       .setDescription(
       `**${lang.GUILD.PREFIX}:** ${prefix}\n` +
       `**${lang.GUILD.STARBOARDS_CHANNEL}** ${!starCh ? lang.GLOBAL.NONE : `<#${starCh}>`}\n` +
-      `**Support Role:** ${!supRole ? lang.GLOBAL.NONE : `<@&${supRole}>`}\n` +
-      `**Staff Notifer:** ${!staffNotify ? 'Disabled' : "Enabled"}\n` +
-      `**Mute Role:** ${!muteRole ? lang.GLOBAL.NONE : `<@&${muteRole}>`}\n` +
+      `**${lang.GUILD.SUPPORT_ROLE}** ${!supRole ? lang.GLOBAL.NONE : `<@&${supRole}>`}\n` +
+      `**${lang.GUILD.MUTE_ROLE}** ${!muteRole ? lang.GLOBAL.NONE : `<@&${muteRole}>`}\n` +
       `**${lang.GUILD.ANNOUNCE_CHANNEL}:** ${!announceCh ? lang.GLOBAL.NONE : `<#${announceCh}>`}\n` +
       `**${lang.GUILD.SUGGEST_CHANNEL}:** ${!suggestCh ? lang.GLOBAL.NONE : `<#${suggestCh}>`}\n` +
       `**${lang.GUILD.WELCOME_CHANNEL}:** ${!welcomeCh ? lang.GLOBAL.NONE : `<#${welcomeCh}>`}\n` +
@@ -40,7 +39,7 @@ module.exports = {
       `**${lang.GUILD.AUDIT_CHANNEL}:** ${!logCh ? lang.GLOBAL.NONE : `<#${logCh}>`}\n` +
       `**${lang.GUILD.WELCOME_ROLE}:** ${!welcRole ? lang.GLOBAL.NONE : `<@&${welcRole}>`}\n` +
       `**${lang.GUILD.LEVEL_UP_MESSAGES}:** ${!levelMsgs ? lang.GLOBAL.NONE : `<#${levelMsgs}>`}\n` +
-      `**Anti-Spam:**  ${!antiSpam ? "Disabled" : "Enabled"}`
+      `**${lang.GUILD.ANTI_SPAM}**  ${!antiSpam ? lang.GLOBAL.DISABLED : lang.GLOBAL.ENABLED}`
       )
       .setThumbnail(message.guild.iconURL({ dynamic: true, size: 1024 }));
     return message.channel.send({ embeds: [embed1]});

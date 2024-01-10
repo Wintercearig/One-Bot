@@ -21,7 +21,6 @@ module.exports = {
 
     const pingMsg = await message.channel.send('Pinging...');
     const gatewayLatency = client.ws.ping === -1 ? "N/A" : client.ws.ping;
-
     let pembed = new EmbedBuilder()
       .setColor(`${process.env.theme}`)
       .setDescription(

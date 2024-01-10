@@ -33,7 +33,7 @@ module.exports = {
 
     if (!banned.bannable) {
         if(banned.id === message.author.id) {
-            return message.channel.send(`You can't ban yourself ban yourself`).then(m => {
+            return message.channel.send(`You can't ban yourself.`).then(m => {
               setTimeout(() => {
                   m.delete().catch(console.error);
               }, 10000); 
@@ -70,7 +70,7 @@ module.exports = {
     .then(async () => {
         let createdCase = await client.addCase(message.guild.id, message.author.id, banned.id, "banned", reason);
 
-        if (guild.modlogs !== undefined && guild.modelogs.enabled === true) {
+        if (guild.modlogs && guild.modelogs.enabled === true) {
             let modLogsChannelID = guild.modlogs.channelID;
             let modLogsChannel = guild.channels.cache.get(modLogsChannelID);
             if (modLogsChannel) {
@@ -82,7 +82,7 @@ module.exports = {
                 });
                 modLogsChannel.send({ embed: modlogsEmbed });
             } else {
-                return message.channel.send(`${message.author.id}, the modlogs channel that was set either no longer exists, or something went terribly wrong`).then(m => {
+                return message.channel.send(`${message.author.id}, the modlogs channel that was set either no longer exists, or something went wrong`).then(m => {
                   setTimeout(() => {
                       m.delete().catch(console.error);
                   }, 10000); 

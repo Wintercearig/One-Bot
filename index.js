@@ -4,7 +4,8 @@ const { Client, GatewayIntentBits, Collection, REST, Routes} = require("discord.
 { connect, connection } = require("mongoose"),
 fs = require('fs'),
 Logger = require("./src/modules/Logger"),
-MongStarboardsManager = require("./src/modules/StarboardsManager");
+MongStarboardsManager = require("./src/modules/StarboardsManager"),
+{ Player } = require('discord-player');
 
 const client = new Client({
   // shards: 'auto',
@@ -26,8 +27,26 @@ const client = new Client({
   sweepers: true,
 });
 
-//DO NOT TOUCH UNLESS ADDING OR DELETING NECESSARY FUNCTIONS
+// entrypoint for discord-player based application
+client.player = new Player(client, {
+  ytdlOptions: {
+      quality: 'highestaudio',
+      filter: 'audioonly',
+  },
+  lagMonitor: 10000,
+  leaveOnEmpty: true,
+  connectionTimeout: 60000,
+  selfDeaf: true,
+});
+
+client.player.extractors.loadDefault();
+/*
+** This makes it easier to use functions without having to require it from functions.js. 
+** Use client.<func>(args)
+*/
+
 const {
+  errorEmbed,
   getCategoryDescription,
   toCapitalize,
   calculateUserXp,
@@ -39,6 +58,8 @@ const {
   updateUserById,
   getGuildById,
   updateGuildById,
+  updateUserNotifs,
+  sendBotUpdates,
   removeGuild,
   addWarning,
   removeUserWarnings,
@@ -62,6 +83,7 @@ const {
 } = require('./src/utils/functions');
 
 [
+  errorEmbed,
   getCategoryDescription,
   toCapitalize,
   calculateUserXp,
@@ -73,6 +95,8 @@ const {
   updateUserById,
   getGuildById,
   updateGuildById,
+  updateUserNotifs,
+  sendBotUpdates,
   removeGuild,
   addWarning,
   removeUserWarnings,
@@ -105,11 +129,6 @@ process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
 });
 
-process.on("warning", (warning) => {
-  console.warn("Node.js Warning:", warning);
-});
-
-//This one's just for fun
 process.on("rejectionHandled", (promise) => {
   console.log("Promise rejection handled:", promise);
 });
@@ -129,10 +148,9 @@ client.starboardsManager = new MongStarboardsManager(client, {
 require("./handlers/commands")(client);
 require("./handlers/events")(client);
 
-connect(process.env.mongoDB, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
+// useNewUrlParser & useUnifiedTopology are deprecated. These options became default in v4.0.0
+connect(process.env.mongoDB)
+.then(() => {
   console.log(`Connected to port: ${connection.port}`);
 }).catch((err) => {
   console.log('Unable to connect to MongoDB Database.\nError: ' + err);

@@ -20,7 +20,18 @@ const userSchema = new Schema({
         reminders: [],
       },
     },
+    notifications: {
+        type: Map,
+        of: Boolean,
+        default: new Map([
+            ['newMessage', true],
+            ['eventReminder', true],
+            // Add more notification types here
+        ])
+    }
     */
+}, {
+  strict: false
 });
 
 module.exports = models.User || model("User", userSchema);

@@ -7,6 +7,19 @@
 
 3- Pull from Main into Your_Branch periodically to stay up to date with Main Branch
 -----------------------------------------------------------------------------------------------------
+[node-fetch] -
+const headers = {
+      'User-Agent': 'YourApp/0.1 by YourRedditUsername'
+    };
+    fetch('https://www.reddit.com/r/memes/random/.json', { headers })
+    .then(response => response.json())
+node-fetch is hell. 'got' npm is the way to go. it's simpler, easier to use, and faster (in my opinion)
+
+[Discord-Opus] - To install discord opus, ensure python, nodejs, npm (node package manager), and most importantly, "Desktop Development with c++" Workload from Visual Studio 2022 or newer is installed, or else it will not install.
+
+Do NOT update Node_Module "chalk" past v"^4.1.2". 
+Newer versions use TS, which won't work with this program, rendering many features, such as custom errors, useless.
+
 Probably Useful
 https://discord.com/developers/docs/reference
 
@@ -53,26 +66,39 @@ ko	Korean	                한국어
 })
 .setDefaultMemberPermissions()
 
-- Discord Permissions List
-    const validPermissions = 
-    (46) [
-    'CreateInstantInvite', 'KickMembers', 'BanMembers', 
-    'Administrator', 'ManageChannels', 'ManageGuild', 
-    'AddReactions', 'ViewAuditLog', 'PrioritySpeaker', 
-    'Stream', 'ViewChannel', 'SendMessages', 
-    'SendTTSMessages', 'ManageMessages', 'EmbedLinks', 
-    'AttachFiles', 'ReadMessageHistory', 'MentionEveryone', 
-    'UseExternalEmojis', 'ViewGuildInsights', 'Connect', 
-    'Speak', 'MuteMembers', 'DeafenMembers', 
-    'MoveMembers', 'UseVAD', 'ChangeNickname', 
-    'ManageNicknames', 'ManageRoles', 'ManageWebhooks', 
-    'ManageEmojisAndStickers', 'ManageGuildExpressions', 'UseApplicationCommands', 
-    'RequestToSpeak', 'ManageEvents', 'ManageThreads', 
-    'CreatePublicThreads', 'CreatePrivateThreads', 'UseExternalStickers', 
-    'SendMessagesInThreads', 'UseEmbeddedActivities', 'ModerateMembers', 
-    'ViewCreatorMonetizationAnalytics', 'UseSoundboard', 'UseExternalSounds', 
-    'SendVoiceMessages'
-];
+- Easy Discord Permissions List
+    const { PermissionsBitField } = require("discord.js");
+
+    let permissionsArray = [];
+
+    Object.keys(PermissionsBitField.Flags).forEach(permission => {
+        permissionsArray.push(permission);
+    });
+    
+    console.log(permissionsArray.join(', '));
+
+FOR REFERENCE:
+(46) All Current Perms
+CreateInstantInvite, KickMembers, BanMembers, Administrator, ManageChannels, ManageGuild, AddReactions, ViewAuditLog, PrioritySpeaker, Stream, ViewChannel, SendMessages, SendTTSMessages, ManageMessages, EmbedLinks, AttachFiles, ReadMessageHistory, MentionEveryone, UseExternalEmojis, ViewGuildInsights, Connect, Speak, MuteMembers, DeafenMembers, MoveMembers, UseVAD, ChangeNickname, ManageNicknames, ManageRoles, ManageWebhooks, ManageEmojisAndStickers, ManageGuildExpressions, UseApplicationCommands, RequestToSpeak, ManageEvents, ManageThreads, CreatePublicThreads, CreatePrivateThreads, UseExternalStickers, SendMessagesInThreads, UseEmbeddedActivities, ModerateMembers, ViewCreatorMonetizationAnalytics, UseSoundboard, UseExternalSounds, SendVoiceMessages
+
+- To be disputed
+// Function to add custom permissions to a command
+async function addCustomPermissions(guildId, commandName, permissions) {
+  const guild = await Guild.findOne({ guildId });
+
+  if (guild) {
+    guild.customPerms = guild.customPerms || {};
+    guild.customPerms[commandName] = permissions;
+    await guild.save();
+  } else {
+    const newGuild = new Guild({
+      guildId,
+      customPerms: { [commandName]: permissions }
+    });
+    await newGuild.save();
+  }
+}
+
 - C:\Recovery\OEM\Wimage\Skin\icons for icons
 - Auto delete message after certain amount of time
 .then(m => {
@@ -145,5 +171,5 @@ prefix = "-"
 token = "bot token"
 mongoDB = "mongodb connection"
 theme = "#9fe3ed"
-owners = "your user id", "someone elses", "or another", "or another", "or yet another"
-supportServer = "https://discord.gg/z3fYrfhjb5"
+owners = "your user id", "someone elses", "or another", "and another", "or yet another"
+supportServer = "your server invite link"

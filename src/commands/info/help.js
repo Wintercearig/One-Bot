@@ -88,7 +88,7 @@ async function helpMSG(client, message) {
         .setPlaceholder('Select A Category')
         .addOptions(
             client.categories
-                .filter(category => category.toLowerCase() !== 'botowner')
+                .filter(category => category.toLowerCase() !== 'botowner' && category.toLowerCase() !== 'test')
                 .map(category => new StringSelectMenuOptionBuilder() 
                     .setLabel(category)
                     .setValue(category.toLowerCase())
@@ -111,7 +111,7 @@ async function helpMSG(client, message) {
                 name: '**[Categories]**', 
                 value: 
                 client.categories
-                .filter(category => category.toLowerCase() !== 'botowner')
+                .filter(category => category.toLowerCase() !== 'botowner' && category.toLowerCase() !== 'test')
                 .map(category => {
                     return `> **${category.charAt(0).toUpperCase() + category.slice(1)}**`;
                 })
@@ -149,11 +149,11 @@ async function helpMSG(client, message) {
           menuBuilder = new EmbedBuilder()
           .setColor(`${process.env.theme}`);
           client.categories
-            .filter(category => category.toLowerCase() !== 'botowner')
+            .filter(category => category.toLowerCase() !== 'botowner' && category.toLowerCase() !== 'test')
             .forEach(category => {
               CmdList.addFields(generateCategoryListing(category, client.commands));
           }),
-          client.slashCategories.filter(category => category.toLowerCase() !== 'botowner')
+          client.slashCategories.filter(category => category.toLowerCase() !== 'botowner' && category.toLowerCase() !== 'test')
           .forEach(category => {
               slashCmdList.addFields(generateCategoryListing(category, client.slash));
           });

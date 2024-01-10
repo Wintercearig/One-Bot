@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 // eslint-disable-next-line no-unused-vars
 require('dotenv').config();
-const { EmbedBuilder } = require("discord.js"),
+const { EmbedBuilder, PermissionsBitField } = require("discord.js"),
 BotModel = require('../../../models/Bot.model'),
 UserModel = require('../../../models/User.model'),
 Guild = require('../../../models/Guild.model');
@@ -9,8 +9,10 @@ Guild = require('../../../models/Guild.model');
 module.exports = async (client, message) => {
 	const guildId = message.guild.id;
 	const userId = message.author.id;
-	const guild = await client.getGuildById(guildId);
-	const mentions = message.mentions.members;
+	// Checks if guild exists, else adds to database
+	const guild = await client.getGuildById(guildId); 
+    let guildData = await Guild.findOne({ guildId: guildId });
+	const customPerms = guildData?.customPerms || {};
 
 	if (message.content === `<@${client.user.id}>`) {
 
@@ -38,10 +40,10 @@ module.exports = async (client, message) => {
 	const sprefix = new RegExp(`${guild.prefix}`);
 	let prefix;
 
-	if (message.content.match(mprefix)) {
-		prefix = message.content.match(mprefix)[0];
-	} else if (message.content.match(sprefix)) {
+	if (message.content.match(sprefix)) {
 		prefix = message.content.match(sprefix);
+	} else if (message.content.match(mprefix)) {
+		prefix = message.content.match(mprefix)[0];
 	}
 
 	if (message.author.bot || message.channel.type === "dm" || !message.content.startsWith(prefix)) return;
@@ -53,11 +55,10 @@ module.exports = async (client, message) => {
 	const command = args.shift().toLowerCase();
 	const cmd =
 		client.commands.get(command) ||
-		client.commands.get(client.aliases.get(command));
-		if (!cmd) {
-			return;
-		}
+		client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(command));
 
+	if (!cmd) return;
+		
 	if (client.commands.has(cmd.name)) {
 		const _client =
 		(await BotModel.findOne({ bot_id: client.user.id })) ||
@@ -86,29 +87,49 @@ module.exports = async (client, message) => {
 
 			return message.channel.send({ embeds: [embed]});
 		}
-
-		if (cmd.botPermissions) {
+		if (cmd.botPermissions && !message.guild.members.me.permissions.has('Administrator')) {
 			const neededPermissions = [];
-			cmd.botPermissions.forEach(perm => {
-				if (!message.channel.permissionsFor(message.guild.me).has(perm)) {
-					neededPermissions.push(perm);
+		
+			if (message.guild && message.channel) {
+				cmd.botPermissions.forEach(perm => {
+					const botPermissionsInChannel = message.channel.permissionsFor(message.guild.me);
+		
+					if (!botPermissionsInChannel || !botPermissionsInChannel.has(perm)) {
+						neededPermissions.push(perm);
+					}
+				});
+		
+				if (neededPermissions.length > 0) {
+					return message.channel.send({ embeds: [client.errorEmbed(neededPermissions, message)]});
 				}
-			});
-
-			if (neededPermissions[0]) {
-				return message.channel.send({ embeds: [client.errorEmbed(neededPermissions, message)]});
+			} else {
+				console.log("Guild or channel information is not available.");
 			}
 		}
+		
 
-		if (guild.customPerms && guild.customPerms[cmd.name]) {
-			const neededPermissions = []; guild.customPerms[cmd.name];
+		if (cmd.customPerms) {
+			const userPermissions = message.member.permissions,
+			hasPermissions = customPerms[cmd.name].filter(perm => userPermissions.has(PermissionsBitField.Flags[perm])),
+			neededPermissions = customPerms[cmd.name].filter(perm => !userPermissions.has(PermissionsBitField.Flags[perm]));
+			let permissionsMessage;
 
-			if(!message.member.permissions.has(neededPermissions)){
-				return message.channel.send({content: 
-					`You need: ${neededPermissions
-					.map(p => `\`${p.toUpperCase()}\``)
-					.join(', ')} permissions to use this command!`});
+			if (hasPermissions.length > 0) {
+				// User has some required perms
+				permissionsMessage = 
+				`Perms You Currently Have That Are Required: ${hasPermissions.map(p => `\`${p.toUpperCase()}\``).join(', ')}
+				Perms You Still Need: ${neededPermissions.map(p => `\`${p.toUpperCase()}\``).join(', ')}`;
+			} else {
+				// User has no perms atol atol
+				permissionsMessage = `You need: ${neededPermissions.map(p => `\`${p.toUpperCase()}\``).join(', ')} permissions to use this command!`;
 			}
+			return message.channel.send({
+				content: permissionsMessage 
+			}).then(m => {
+				setTimeout(() => {
+					m.delete().catch(console.error);
+				}, 10000);
+			});
 		} else if (cmd.memberPermissions) {
 			const neededPermissions = [];
 			cmd.memberPermissions.forEach(perm => {
@@ -141,4 +162,3 @@ module.exports = async (client, message) => {
 		return;
 	}
 };
-

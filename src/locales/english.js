@@ -12,6 +12,8 @@ module.exports = {
       NONE: "None",
       YES: "Yes",
       NO: "No",
+      ENABLED: "Enabled",
+      DISABLED: "Disabled"
     },
     GUILD: {
       NOT_FOUND: "That guild was not found",
@@ -19,6 +21,9 @@ module.exports = {
       LEVEL_UP_MESSAGES: "Level up messages",
       ANNOUNCE_CHANNEL: "Announcement",
       AUDIT_CHANNEL: "Audit",
+      MUTE_ROLE: "Mute Role",
+      SUPPORT_ROLE: "Support Role",
+      ANTI_SPAM: "Anti Spam",
       STARBOARDS_CHANNEL: "Starboards",
       SUGGEST_CHANNEL: "Suggestion",
       WELCOME_CHANNEL: "Welcome ",

@@ -1,19 +1,21 @@
-/* eslint-disable no-process-exit */
 const { readdirSync } = require('fs');
 const ascii = require('ascii-table');
 const table = new ascii().setHeading('Commands', 'Status');
 
 module.exports = (client) => {
-  const loadedCommands = new Set();
-  const loadedSlashCommands = new Set();
-  const loadedAliases = new Set();
+  // Using Maps instead of Sets for storing file paths
+  const loadedCommands = new Map();
+  const loadedAliases = new Map();
+  let dupes = []; 
 
-  const checkDuplicates = (loadedSet, item, type) => {
-    if (loadedSet.has(item.toLowerCase())) {
-      console.error(`Duplicate ${type} found: ${item.toLowerCase()}`);
+  const checkDuplicates = (loadedMap, item, type, filePath) => {
+    if (loadedMap.has(item.toLowerCase())) {
+      dupes.push(`Duplicate ${type} found: ${item.toLowerCase()}.
+      \nDuplicate Location: ${filePath}
+      \nExisting location: ${loadedMap.get(item.toLowerCase())}`);
       return true;
     }
-    loadedSet.add(item.toLowerCase());
+    loadedMap.set(item.toLowerCase(), filePath);
     return false;
   };
 
@@ -22,49 +24,55 @@ module.exports = (client) => {
       const commands = readdirSync(`${commandsPath}/${dir}/`).filter(f => f.endsWith('.js'));
 
       for (let file of commands) {
-        let pull = require(`.${commandsPath}/${dir}/${file}`);
+        const filePath = `${commandsPath}/${dir}/${file}`;
+        let pull;
+        try {
+          pull = require(`.${filePath}`);
+        } catch (error) {
+          console.error(`Failed to load command at ${filePath}:`, error);
+          table.addRow(file, '❌ -> CMD failed to load.');
+          continue;
+        }
 
         if (isSlashCommand && pull.data) {
-            // Loads slash commands
-            if (checkDuplicates(loadedSlashCommands, pull.data.name, 'slash command')) {
-              continue;
-            }
-
-            client.slash.set(pull.data.name.toLowerCase(), pull);
-            table.addRow(file, '✅ Slash CMD!');
-          } else if (!isSlashCommand && pull.name) {
-            // Loads reg commands
-            if (checkDuplicates(loadedCommands, pull.name, 'command')) {
-              continue;
-            }
-
-            client.commands.set(pull.name.toLowerCase(), pull);
-            table.addRow(file, '✅ MSG CMD!');
-            if (pull.aliases && Array.isArray(pull.aliases)) {
-              for (let alias of pull.aliases) {
-                if (checkDuplicates(loadedAliases, alias, 'alias')) {
-                  continue; 
-                }
-  
+          // Loads slash commands
+          const isDupe = checkDuplicates(loadedCommands, pull.data.name, 'slash command', filePath);
+          client.slash.set(pull.data.name.toLowerCase(), pull);
+          table.addRow(file, isDupe ? '⚠️ Slash CMD!' : '✅ Slash CMD!');
+        } else if (!isSlashCommand && pull.name) {
+          // Loads reg commands
+          const isDupe = checkDuplicates(loadedCommands, pull.name, 'command', filePath);
+          client.commands.set(pull.name.toLowerCase(), pull);
+          table.addRow(file, isDupe ? '⚠️ MSG CMD!' : '✅ MSG CMD!');
+          
+          if (pull.aliases && Array.isArray(pull.aliases)) {
+            pull.aliases.forEach(alias => {
+              if (checkDuplicates(loadedAliases, alias, 'alias', filePath)) return;
+              if (client.aliases.has(alias)) {
+                console.warn(`Duplicate alias detected: ${alias}`);
+              } else {
                 client.aliases.set(alias, pull.name);
               }
+            });
           }
         } else {
-          table.addRow(file, '❌ -> CMD failed to load.');
+          table.addRow(file, '❌ -> CMD missing name.');
           continue;
         }
       }
     });
 
-    // Clears Sets when fin
+    if (dupes.length > 0) {
+      console.log("Duplicate Commands Detected:");
+      dupes.forEach(duplicate => console.log(duplicate));
+    }
+
+    // Clears Maps when finished
     loadedCommands.clear();
     loadedAliases.clear();
-    loadedSlashCommands.clear();
   };
 
-  // Load regular message commands
   loadCommands('./src/commands');
-  // Load slash commands
   loadCommands('./src/slashCommands', true);
 
   console.log(table.toString());

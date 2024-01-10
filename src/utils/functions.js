@@ -3,9 +3,17 @@ const Guild = require("../../models/Guild.model");
 const Case = require("../../models/Case.model");
 const Logger = require("../modules/Logger");
 const { Util } = require("discord.js");
+const BaseEmbed = require("../modules/BaseEmbed");
 // const { errorLogsChannelId, dashboard } = require("../../config.json");
 // const jwt = require("jsonwebtoken");
 const fs = require("fs");
+
+const errorEmbed = (permissions, message) => {
+  return BaseEmbed(message)
+    .setTitle("Woah!")
+    .setDescription(`❌ I need ${permissions.map((p) => `\`${p}\``).join(", ")} permissions!`)
+    .setColor(process.env.error);
+};
 
 function formattedDate() {
   const date = new Date();
@@ -43,7 +51,7 @@ async function getCategoryDescription(category) {
       return 'Groove to the beat! Enjoy melodies, play, skip, and control tunes. Share your favorite tracks with fellow server members in the Music category!';
     case 'tickets':
       return 'Swift support! Manage tickets for efficient issue resolution. Enhance your server support experience with the Tickets category!';
-    case 'Util':
+    case 'util':
       return 'Handy utilities at your fingertips. Explore commands for various tasks, ensuring convenience and efficiency. Simplify server management with the Util category';
     default:
       return 'No category description available.';
@@ -52,18 +60,16 @@ async function getCategoryDescription(category) {
 
 async function addCase(guildId, userId, moderator, action, reason) {
   try {
-    // Find the guild's document or create a new one if it doesn't exist
     let guildCase = await Case.findOne({ guildId: guildId });
 
     if (!guildCase) {
       guildCase = new Case({
         guildId: guildId,
         cases: new Map(),
-        caseCounter: 1, // Initialize the global case counter
+        caseCounter: 1,
       });
     }
 
-    // Find the user's cases map or create a new one if it doesn't exist
     let userCases = guildCase.cases.get(userId);
 
     if (!userCases) {
@@ -71,10 +77,8 @@ async function addCase(guildId, userId, moderator, action, reason) {
       guildCase.cases.set(userId, userCases);
     }
 
-    // Increment the global case counter
     const caseId = guildCase.caseCounter;
 
-    // Create a new case entry and add it to the user's cases
     const newCase = {
       moderator: moderator,
       action: action,
@@ -84,10 +88,8 @@ async function addCase(guildId, userId, moderator, action, reason) {
 
     userCases.set(caseId, newCase);
 
-    // Increment the global case counter for the next case
     guildCase.caseCounter++;
 
-    // Save the updated guildCase document
     await guildCase.save();
 
     return newCase;
@@ -97,21 +99,18 @@ async function addCase(guildId, userId, moderator, action, reason) {
 }
 
 async function getLatestCaseNumber(guildId, userId) {
-  // Find the guild's document
   const guildCase = await Case.findOne({ guildId: guildId });
 
   if (!guildCase) {
-    return null; // Guild not found
+    return null;
   }
 
-  // Find the user's cases map
   const userCases = guildCase.cases.get(userId);
 
   if (!userCases) {
-    return null; // User not found
+    return null;
   }
 
-  // Find the latest case number for the user
   let latestCaseNumber = 0;
   for (const caseNumber of userCases.keys()) {
     if (caseNumber > latestCaseNumber) {
@@ -211,6 +210,58 @@ async function updateGuildById(guildId, settings) {
     await Guild.findOneAndUpdate(guildId, settings);
   } catch (e) {
     console.error(e);
+  }
+}
+
+async function updateUserNotifs(userId, notifType, isEnabled) {
+  try {
+    const normalizedNotifType = notifType.toLowerCase();
+    let update = {};
+
+    const user = await User.findOne({ user_id: userId });
+    if (!user) {
+      const newUser = new User({
+        user_id: userId,
+        notifications: [
+          normalizedNotifType
+        ]
+      });
+      await newUser.save();
+
+    } else {
+      if (isEnabled) {
+        update = { $addToSet: { notifications: [normalizedNotifType] } };
+      } else {
+        update = { $pull: { notifications: normalizedNotifType } };
+      }
+
+      await User.findOneAndUpdate(
+        { user_id: userId },
+        update,
+        { returnDocument: 'after' }
+      );
+    }
+  } catch (error) {
+    console.log('Error updating user notif settings', error);
+  }
+}
+
+async function sendBotUpdates(client, notificationMessage) {
+  try {
+    // Fetch users from the database who have 'bot updates' enabled
+    const usersWithBotUpdates = await User.find({ notifications: { $in: ['botupdates'] } });
+
+    // Send a DM to each user
+    for (const user of usersWithBotUpdates) {
+      try {
+        const recipient = await client.users.fetch(user.user_id);
+        await recipient.send(notificationMessage);
+      } catch (error) {
+        console.error(`Could not send message to user ${user.user_id}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Error sending bot updates notifications:', error);
   }
 }
 
@@ -475,6 +526,7 @@ function encode(obj) {
 */
 
 module.exports = {
+  errorEmbed,
   getCategoryDescription,
   toCapitalize,
   calculateUserXp,
@@ -486,6 +538,8 @@ module.exports = {
   updateUserById,
   getGuildById,
   updateGuildById,
+  updateUserNotifs,
+  sendBotUpdates,
   removeGuild,
   addWarning,
   removeUserWarnings,

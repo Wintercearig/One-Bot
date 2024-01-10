@@ -8,7 +8,7 @@ const guildSchema = new Schema({
   // disabled_commands: { type: Array, default: [] },
   // disabled_categories: { type: Array, default: [] },
   // panel_chan_id: { type: String, default: null },
-  // panel_msg_id: { type: String, default: null },
+  // panel_msg_id: { type: String, default: null },\
   /*anti_spam: {
     type: Object,
     default: {

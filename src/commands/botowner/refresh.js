@@ -14,6 +14,12 @@ module.exports = {
       return message.channel.send("Please provide what to refresh (all/category/command/event/eventCat) and a name.\nDon't forget to add a forward slash at the beginning of the command name or category name if you wanna refresh slash.");
     }
 
+    /*
+    ** [WARNING]
+    ** Sophisticated stuff. Do NOT make changes to this code, unless you know what you are doing.
+    */
+
+    // Inner cmd aliases
     const commandTypeMap = {
       'a': 'all',
       'cat': 'category',
@@ -26,11 +32,14 @@ module.exports = {
       's': 'slash',
       '/': 'slash'
   };
-  
+
+    // Acts as an Inner Cmd aliase handler
     const typeArg = args[0].toLowerCase();
     const type = commandTypeMap[typeArg] || typeArg;
 
     let name = args[1] ? args[1].toLowerCase() : null;
+
+    // Set false as default, lest cmd is slash oriented
     let isSlashCommand = false;
 
     // Check if it's a slash command or message command depending on input for {name}
@@ -39,6 +48,7 @@ module.exports = {
       name = name.substring(1); // Remove the forward slash
     }
 
+    // Switch case (obviously)
     try {
       switch(type) {
         case "all":
@@ -71,6 +81,7 @@ module.exports = {
   }
 };
 
+// Returns best "guess", if user words a cat name weirdly, or shortens it for whatever reason
 function findBestMatchCategory(categoryName, basePath) {
   const categories = readdirSync(basePath).filter(name => lstatSync(path.join(basePath, name)).isDirectory());
   const { bestMatch } = stringSimilarity.findBestMatch(categoryName, categories);
@@ -78,6 +89,7 @@ function findBestMatchCategory(categoryName, basePath) {
   return bestMatch.target;
 }
 
+// Self explanatory, but this refreshes everything, from commands to events.
 function refreshAll(client) {
   client.commands.clear();
   client.slash.clear();
@@ -89,6 +101,7 @@ function refreshAll(client) {
   loadEvents(client, './src/events');
 }
 
+// Refreshes an entire category, slash or msg
 function refreshCategory(client, message, categoryName, isSlashCommand) {
   const basePath = isSlashCommand ? 'src/slashCommands' : 'src/commands';
   const categoryPath = path.join(basePath, categoryName);
@@ -111,6 +124,7 @@ function refreshCategory(client, message, categoryName, isSlashCommand) {
   message.channel.send(responseMessage);
 }
 
+// Refreshes an entire event category
 function refreshEventCategory(client, message, eventCategoryName) {
   const eventCategories = readdirSync('./src/events').filter(name => lstatSync(path.join('./src/events', name)).isDirectory());
   const { bestMatch } = stringSimilarity.findBestMatch(eventCategoryName, eventCategories);
@@ -135,8 +149,9 @@ function refreshEventCategory(client, message, eventCategoryName) {
   }
 }
 
+// Supposed to refresh a single command, but it's bipolar, so yeah.
 function refreshCommand(client, message, commandName, isSlashCommand) {
-  const basePath = isSlashCommand ? './src/slashCommands' : './src/commands';
+  const basePath = isSlashCommand ? 'src/slashCommands' : 'src/commands';
   let found = false;
 
   readdirSync(basePath).forEach(dir => {
@@ -146,10 +161,18 @@ function refreshCommand(client, message, commandName, isSlashCommand) {
           const commandPath = path.resolve(basePath, dir, file);
           delete require.cache[require.resolve(commandPath)];
           const newCommand = require(commandPath);
+
           if (isSlashCommand) {
             client.slash.set(newCommand.data.name, newCommand);
           } else {
             client.commands.set(newCommand.name, newCommand);
+            // Reset aliases for this command
+            if (newCommand.aliases) {
+              newCommand.aliases.forEach(alias => {
+                client.aliases.delete(alias);
+                client.aliases.set(alias, newCommand.name);
+              });
+            }
           }
           found = true;
           message.channel.send(`Command \`${commandName}\` has been refreshed.`);
@@ -165,6 +188,7 @@ function refreshCommand(client, message, commandName, isSlashCommand) {
     message.channel.send(`Command \`${commandName}\` not found.`);
   }
 }
+
 
 function refreshEvent(client, message, eventName) {
   let eventFound = false;
