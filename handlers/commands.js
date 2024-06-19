@@ -4,7 +4,7 @@ let table = new ascii();
 /*
 // Loads all commands, including slash commands, and their respective alias's
 // Checks for duped commands in the bot and displays dupes and original locations
-// 
+// Also displays commands that were loaded and failed
 */
 module.exports = (client) => {
   const loadedCommands = new Map();
