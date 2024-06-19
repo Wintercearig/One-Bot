@@ -6,7 +6,6 @@ const os = require('os');
 require('dotenv').config();
 const Bot = require('../../../models/Bot.model');
 const fs = require('fs');
-const path = require('path');
 
 module.exports = {
   name: 'botinfo',
@@ -29,9 +28,6 @@ module.exports = {
 	  const core = os.cpus()[0];
     const categories = fs.readdirSync('./src/commands/');
     const memUsage = process.memoryUsage();
-    const botDirectory = path.join(__dirname, '../../../');
-    const directorySize = getDirectorySize(botDirectory);
-    const formattedSize = formatBytes(directorySize);
 
     clearInterval(interval);
 
@@ -54,7 +50,7 @@ module.exports = {
 			      **❋ Users:** ${client.guilds.cache.reduce((a, b) => a + b.memberCount, 0).toLocaleString()}
 			      **❋ Creation Date:** ${utc(client.user.createdTimestamp).format('MMMM Do, YYYY, HH:mm:ss')}
 		    	  **❋ Node.js:** ${process.version}
-		    	  **❋ Bot Version:** v${version}
+		    	  **❋ Bot Version:** ${version}
 		    	  **❋ Discord.js:** v${djsversion}
 			  \u200b`
 		  })
@@ -70,7 +66,7 @@ module.exports = {
         \u3000 Total: 32 GB
         \u3000 Free: ${(os.freemem() / 1024 / 1024 / 1024).toFixed(2)} GB
         **❋ Bot Memory Usage:**
-        \u3000 Bot Directory Size: ${formattedSize}
+        \u3000 Bot Directory Size: 359 MB
         \u3000 RSS: ${(memUsage.rss / 1024 / 1024).toFixed(2)} MB
         \u3000 Heap Total: ${(memUsage.heapTotal / 1024 / 1024).toFixed(2)} MB
         \u3000 Heap Used: ${(memUsage.heapUsed / 1024 / 1024).toFixed(2)} MB
@@ -84,40 +80,6 @@ module.exports = {
       .setFooter({text: `${message.author.username}`, iconURL: message.author.displayAvatarURL({ dynamic: true, size: 512 })});
         await loadingMessage.edit({ content: null, embeds: [embed] }).catch(console.error);  },
 };
-
-function getDirectorySize(directory) {
-  let totalSize = 0;
-
-  function readDirectory(dir) {
-    const files = fs.readdirSync(dir);
-
-    for (const file of files) {
-      const filePath = path.join(dir, file);
-      const stat = fs.statSync(filePath);
-
-      if (stat.isDirectory()) {
-        readDirectory(filePath);
-      } else {
-        totalSize += stat.size;
-      }
-    }
-  }
-
-  readDirectory(directory);
-  return totalSize;
-}
-
-function formatBytes(bytes, decimals = 2) {
-  if (bytes === 0) return '0 Bytes';
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
 
 function duration(ms) {
   const sec = Math.floor((ms / 1000) % 60);

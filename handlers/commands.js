@@ -1,12 +1,21 @@
 const { readdirSync } = require('fs');
 const ascii = require('ascii-table');
-const table = new ascii().setHeading('Commands', 'Status');
-
+let table = new ascii();
+/*
+// Loads all commands, including slash commands, and their respective alias's
+// Checks for duped commands in the bot and displays dupes and original locations
+// 
+*/
 module.exports = (client) => {
-  // Using Maps instead of Sets for storing file paths
   const loadedCommands = new Map();
   const loadedAliases = new Map();
-  let dupes = []; 
+  let dupes = [];
+
+  let totalCommands = 0;
+  let commandsLoaded = 0;
+  let totalSlashCommands = 0;
+  let slashCommandsLoaded = 0;
+  let failedCommands = [];
 
   const checkDuplicates = (loadedMap, item, type, filePath) => {
     if (loadedMap.has(item.toLowerCase())) {
@@ -23,6 +32,12 @@ module.exports = (client) => {
     readdirSync(commandsPath).forEach(dir => {
       const commands = readdirSync(`${commandsPath}/${dir}/`).filter(f => f.endsWith('.js'));
 
+      if (isSlashCommand) {
+        totalSlashCommands += commands.length;
+      } else {
+        totalCommands += commands.length;
+      }
+
       for (let file of commands) {
         const filePath = `${commandsPath}/${dir}/${file}`;
         let pull;
@@ -30,34 +45,30 @@ module.exports = (client) => {
           pull = require(`.${filePath}`);
         } catch (error) {
           console.error(`Failed to load command at ${filePath}:`, error);
-          table.addRow(file, '❌ -> CMD failed to load.');
+          failedCommands.push({file: file, type: isSlashCommand ? '/ CMD' : 'MSG CMD'});
           continue;
         }
 
         if (isSlashCommand && pull.data) {
-          // Loads slash commands
           const isDupe = checkDuplicates(loadedCommands, pull.data.name, 'slash command', filePath);
-          client.slash.set(pull.data.name.toLowerCase(), pull);
-          table.addRow(file, isDupe ? '⚠️ Slash CMD!' : '✅ Slash CMD!');
+          if (!isDupe) {
+            slashCommandsLoaded++;
+            client.slash.set(pull.data.name.toLowerCase(), pull);
+          }
         } else if (!isSlashCommand && pull.name) {
-          // Loads reg commands
           const isDupe = checkDuplicates(loadedCommands, pull.name, 'command', filePath);
-          client.commands.set(pull.name.toLowerCase(), pull);
-          table.addRow(file, isDupe ? '⚠️ MSG CMD!' : '✅ MSG CMD!');
-          
+          if (!isDupe) {
+            commandsLoaded++;
+            client.commands.set(pull.name.toLowerCase(), pull);
+          }
+
           if (pull.aliases && Array.isArray(pull.aliases)) {
             pull.aliases.forEach(alias => {
-              if (checkDuplicates(loadedAliases, alias, 'alias', filePath)) return;
-              if (client.aliases.has(alias)) {
-                console.warn(`Duplicate alias detected: ${alias}`);
-              } else {
+              if (!checkDuplicates(loadedAliases, alias, 'alias', filePath)) {
                 client.aliases.set(alias, pull.name);
               }
             });
           }
-        } else {
-          table.addRow(file, '❌ -> CMD missing name.');
-          continue;
         }
       }
     });
@@ -67,13 +78,16 @@ module.exports = (client) => {
       dupes.forEach(duplicate => console.log(duplicate));
     }
 
-    // Clears Maps when finished
     loadedCommands.clear();
     loadedAliases.clear();
   };
 
   loadCommands('./src/commands');
   loadCommands('./src/slashCommands', true);
+
+  table.setHeading('Loaded', 'Failed');
+  table.addRow(`${commandsLoaded}/${totalCommands} cmds loaded`, `${failedCommands.length} failed`);
+  table.addRow(`${slashCommandsLoaded}/${totalSlashCommands} / cmds loaded`, failedCommands.map(cmd => `${cmd.file} ❌ ${cmd.type}`).join('\n'));
 
   console.log(table.toString());
 };

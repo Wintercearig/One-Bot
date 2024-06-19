@@ -78,7 +78,7 @@ ko	Korean	                한국어
     console.log(permissionsArray.join(', '));
 
 FOR REFERENCE:
-(46) All Current Perms
+(46) Perms
 CreateInstantInvite, KickMembers, BanMembers, Administrator, ManageChannels, ManageGuild, AddReactions, ViewAuditLog, PrioritySpeaker, Stream, ViewChannel, SendMessages, SendTTSMessages, ManageMessages, EmbedLinks, AttachFiles, ReadMessageHistory, MentionEveryone, UseExternalEmojis, ViewGuildInsights, Connect, Speak, MuteMembers, DeafenMembers, MoveMembers, UseVAD, ChangeNickname, ManageNicknames, ManageRoles, ManageWebhooks, ManageEmojisAndStickers, ManageGuildExpressions, UseApplicationCommands, RequestToSpeak, ManageEvents, ManageThreads, CreatePublicThreads, CreatePrivateThreads, UseExternalStickers, SendMessagesInThreads, UseEmbeddedActivities, ModerateMembers, ViewCreatorMonetizationAnalytics, UseSoundboard, UseExternalSounds, SendVoiceMessages
 
 - To be disputed

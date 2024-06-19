@@ -8,7 +8,6 @@ const {
 Guild = require('../../../models/Guild.model'),
 stringSimilarity = require('string-similarity'),
 interactionCollectors = {};
-
 module.exports = {
     name: 'help',
     aliases: ['h'],
@@ -96,7 +95,7 @@ async function helpMSG(client, message) {
             )),
     row = new ActionRowBuilder()
         .addComponents(homeButton, cmdListButton, slashListButton),
-        row2 = new ActionRowBuilder()
+    row2 = new ActionRowBuilder()
         .addComponents(select),
     HelpEmbed = new EmbedBuilder()
         .setColor(`${process.env.theme}`)
@@ -269,7 +268,6 @@ async function helpMSG(client, message) {
             return;
         }
     });
-
 }
 
 /**

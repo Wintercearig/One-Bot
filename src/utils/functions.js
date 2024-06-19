@@ -15,6 +15,34 @@ const errorEmbed = (permissions, message) => {
     .setColor(process.env.error);
 };
 
+function getTrackInfo(track) {
+  let color;
+  let iconUrl;
+
+  switch (track) {
+      case 'youtube':
+          color = '#FF0000';
+          iconUrl = 'https://github.com/Wintercearig/One-Bot/blob/main/src/images/youtube-music.png?raw=true';
+          break;
+      case 'spotify':
+          color = '#1DB954';
+          iconUrl = 'https://github.com/Wintercearig/One-Bot/blob/main/src/images/spotify.png?raw=true';
+          break;
+      case 'apple':
+          color = '#FFFFFF';
+          iconUrl = 'https://github.com/Wintercearig/One-Bot/blob/main/src/images/applemusic.png?raw=true';
+          break;
+      default:
+          color = '#000000';
+          iconUrl = 'https://github.com/Wintercearig/One-Bot/blob/main/src/images/default.png?raw=true';
+  }
+
+  return {
+      color: color,
+      iconUrl: iconUrl,
+  };
+}
+
 function formattedDate() {
   const date = new Date();
   const options = {
@@ -527,6 +555,7 @@ function encode(obj) {
 
 module.exports = {
   errorEmbed,
+  getTrackInfo,
   getCategoryDescription,
   toCapitalize,
   calculateUserXp,

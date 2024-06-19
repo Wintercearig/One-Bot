@@ -15,16 +15,13 @@ module.exports = {
     const voiceChannel = message.member.voice.channel;
     const queue = useQueue(message.guild.id);
     const member = message.guild.members.cache.get(message.author.id);
+    await message.delete();
 
     const embed = new EmbedBuilder()
     .setColor(process.env.error);
 
     if(!voiceChannel){
-        if(queue){
-            return message.channel.send({ embeds: [embed.setDescription(":x: | You are not in a channel, plus it wouldn't matter anyways since I can only play music in one channel, per guild, unless you opt in for premium, which has said feature(In Development).")]});
-        } else {
-            return message.channel.send({ embeds: [embed.setDescription(":x: | You're not in a voice channel. Join one to get jamming!!")]});
-        }
+        return message.channel.send({ embeds: [embed.setDescription(":x: | You're not in a voice channel. Join one to get jamming!!")]});
     }
 
     if (queue && queue.channel.id !== voiceChannel.id) {
@@ -58,17 +55,22 @@ module.exports = {
     }
 
     try {
+        // Player events are in src/events/player
         client.player.play(voiceChannel, searchResult, {
             nodeOptions: {
-              metadata: message.channel,
+              metadata: { // Very necessary for player events n such
+                channel: message.channel,
+                startedBy: message.author
+              },
+              voiceChannel: voiceChannel // How the bot plays music/connects to said channel
             },
+            selfDeaf: true,
+            volume: 80,
+            leaveOnEnd: false,
+            leaveOnStop: false,
+            leaveOnEmpty: true,
+            connectionTimeout: 30000
         });
-
-        client.player.events.on('connection', queue => {
-
-        });
-
-
     } catch (e) {
         console.error(e);
         message.channel.send({ embeds: [embed.setDescription(`:x: | Something went wrong: ${e.message}`)]});

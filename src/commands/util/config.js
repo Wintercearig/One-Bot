@@ -22,7 +22,8 @@ module.exports = {
     welcRole = guild.config?.welcome_data?.role_id ?? null,
     supRole = guild.config?.support_data?.role_id ?? null,
     muteRole = guild.config?.muted_role_id ?? null,
-    musicDj = guild.config?.music_dj?.enabled ?? null;
+    musiclogs = guild.config?.music_logs?.channel_id ?? null;
+
     
     const embed1 = new EmbedBuilder()
       .setTitle(lang.ADMIN.GUILD_CONFIG.replace("{guildName}", name))

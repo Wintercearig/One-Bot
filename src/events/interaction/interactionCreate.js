@@ -1,10 +1,16 @@
+/*
+ * Long Lasting things for here.
+ * Short lasting, in immediate file, with a collector. Example: help.js buttons
+ */
 module.exports = async (client, interaction) => {
+
   if (!interaction.isCommand()) return;
 
   const commandName = interaction.commandName;
   const SL = client.slash.get(commandName);
 // SL.data.name
 // SL.data.description
+
   if (client.slash.has(commandName)) {
       try {
           await SL.execute(interaction);

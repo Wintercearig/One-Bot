@@ -1,3 +1,4 @@
+/* eslint-disable node/no-extraneous-require */
 require('dotenv').config();
 
 const { Client, GatewayIntentBits, Collection, REST, Routes} = require("discord.js"),
@@ -5,7 +6,17 @@ const { Client, GatewayIntentBits, Collection, REST, Routes} = require("discord.
 fs = require('fs'),
 Logger = require("./src/modules/Logger"),
 MongStarboardsManager = require("./src/modules/StarboardsManager"),
-{ Player } = require('discord-player');
+{ Player } = require('discord-player'),
+{ 
+  YouTubeExtractor, 
+  SpotifyExtractor, 
+  SoundCloudExtractor, 
+  AppleMusicExtractor, 
+  VimeoExtractor, 
+  AttachmentExtractor, 
+  ReverbnationExtractor 
+} = require("@discord-player/extractor");
+
 
 const client = new Client({
   // shards: 'auto',
@@ -29,24 +40,30 @@ const client = new Client({
 
 // entrypoint for discord-player based application
 client.player = new Player(client, {
+  skipFFmpeg: false,
   ytdlOptions: {
       quality: 'highestaudio',
       filter: 'audioonly',
+      highWaterMark: 1 << 25
   },
-  lagMonitor: 10000,
-  leaveOnEmpty: true,
-  connectionTimeout: 60000,
-  selfDeaf: true,
 });
 
-client.player.extractors.loadDefault();
+client.player.extractors.unregisterAll();
+client.player.extractors.register(YouTubeExtractor, {});
+client.player.extractors.register(SpotifyExtractor, {});
+client.player.extractors.register(SoundCloudExtractor, {});
+client.player.extractors.register(AppleMusicExtractor, {});
+client.player.extractors.register(VimeoExtractor, {});
+client.player.extractors.register(ReverbnationExtractor, {});
+client.player.extractors.register(AttachmentExtractor, {});
 /*
-** This makes it easier to use functions without having to require it from functions.js. 
-** Use client.<func>(args)
-*/
+ * This makes it easier to use functions without having to require it from functions.js. 
+ * Use client.<func>(args)
+ */
 
 const {
   errorEmbed,
+  getTrackInfo,
   getCategoryDescription,
   toCapitalize,
   calculateUserXp,
@@ -84,6 +101,7 @@ const {
 
 [
   errorEmbed,
+  getTrackInfo,
   getCategoryDescription,
   toCapitalize,
   calculateUserXp,
@@ -138,6 +156,9 @@ client.slash = new Collection();
 client.events = new Collection();
 client.aliases = new Collection();
 client.afk = new Map();
+// Saves music session event discord message ID's, to actively clean message id's
+client.musicSessionStates = new Map();
+
 client.categories = fs.readdirSync('./src/commands/');
 client.slashCategories = fs.readdirSync('./src/slashCommands/');
 client.logger = Logger;
