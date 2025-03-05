@@ -166,6 +166,7 @@ async function getUserById(userId) {
     console.error(e);
   }
 }
+
 async function checkUserPermissions(member, requiredPermissions) {
 	return requiredPermissions.every(permission => member.hasPermission(permission));
 }

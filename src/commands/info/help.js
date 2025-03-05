@@ -13,6 +13,7 @@ module.exports = {
     aliases: ['h'],
     category: "info",
     description: 'Displays the help menu',
+    cooldown: 5,
     run: async (client, message, args) => {
         if (args[0]) {
             message.delete();

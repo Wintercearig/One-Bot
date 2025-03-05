@@ -153,6 +153,7 @@ process.on("rejectionHandled", (promise) => {
 
 client.commands = new Collection();
 client.slash = new Collection();
+client.cooldowns = new Collection();
 client.events = new Collection();
 client.aliases = new Collection();
 client.afk = new Map();

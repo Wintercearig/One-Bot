@@ -29,7 +29,7 @@ module.exports = {
     }
 
     if (voiceChannel.full){
-        return message.channel.send({ embeds: [embed.setDescription(':x: | This channel is packed!\nRemove a few people so that I may join.')]});
+        return message.channel.send({ embeds: [embed.setDescription(':x: | This channel is packed!\nRemove someone or change the user limit so that I may join.')]});
     }
 
     if(message.member.voice.deaf){

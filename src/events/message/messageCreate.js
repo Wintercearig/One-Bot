@@ -36,17 +36,11 @@ module.exports = async (client, message) => {
 		});
 	}
 
-	const mprefix = new RegExp(`^<@!${client.user.id}>`);
-	const sprefix = new RegExp(`${guild.prefix}`);
-	let prefix;
+    const prefix = message.content.startsWith(`<@!${client.user.id}>`)
+        ? `<@!${client.user.id}>`
+        : guild.prefix;
 
-	if (message.content.match(sprefix)) {
-		prefix = message.content.match(sprefix);
-	} else if (message.content.match(mprefix)) {
-		prefix = message.content.match(mprefix)[0];
-	}
-
-	if (message.author.bot || message.channel.type === "dm" || !message.content.startsWith(prefix)) return;
+	if (!message.content.startsWith(prefix)) return;
 
 	const args = message.content
 		.slice(prefix.length)
@@ -60,13 +54,13 @@ module.exports = async (client, message) => {
 	if (!cmd) return;
 		
 	if (client.commands.has(cmd.name)) {
-		const _client =
-		(await BotModel.findOne({ bot_id: client.user.id })) ||
-		(await BotModel.create({ bot_id: client.user.id }));
 
-	_client.total_used_cmds = (_client.total_used_cmds || 0) + 1;
+		await BotModel.updateOne(
+			{ bot_id: client.user.id },
+			{ $inc: { total_used_cmds: 1 } },
+			{ upsert: true }
+		);
 
-	_client.save();
 		if (cmd.ownerOnly && !process.env.owners.includes(message.author.id)) {
 			return message.reply(
 				'This command can only be used by the bot owners!'
@@ -107,7 +101,7 @@ module.exports = async (client, message) => {
 			}
 		}
 		
-
+		// Custom Perms are user defined permissions. More functionality, but also more dangerous.
 		if (cmd.customPerms) {
 			const userPermissions = message.member.permissions,
 			hasPermissions = customPerms[cmd.name].filter(perm => userPermissions.has(PermissionsBitField.Flags[perm])),
@@ -151,10 +145,17 @@ module.exports = async (client, message) => {
 			}
 		}
 
-		if (cmd.nsfwOnly && cmd.nsfwOnly === true && !message.channel.nsfw) {
-			return message.channel.send(
-				'This channel is SFW! Please migrate to an NSFW channel!'
-			);
+		if (cmd.nsfwOnly && !message.channel.nsfw) {
+			const embed = new EmbedBuilder()
+				.setTitle('Restricted Command')
+				.setDescription('This channel is SFW! Please use this command in an NSFW channel.')
+				.setColor('RED')
+				.setTimestamp();
+			return message.channel.send({ embeds: [embed] }).then(m => {
+				setTimeout(() => {
+					m.delete().catch(console.error);
+				}, 10000); 
+			});
 		}
 		
 		cmd.run(client, message, args);

@@ -72,7 +72,6 @@ module.exports = {
         \u3000 Heap Used: ${(memUsage.heapUsed / 1024 / 1024).toFixed(2)} MB
         \u3000 External: ${(memUsage.external / 1024 / 1024).toFixed(2)} MB
         **❋ Architecture:** ${os.arch()}
-        **❋ Load Average:** ${os.loadavg().join(' ')}
         \u3000
         **Developed in JS (VsCode) with DJS**`
 		  })
