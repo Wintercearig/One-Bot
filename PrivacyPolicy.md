@@ -1,5 +1,5 @@
 # Privacy Policy
-Last Updated: [Insert Date]
+Last Updated: 3/13/2025 | 1855 hours on Thursday
 
 This Privacy Policy ("Policy") describes how One Bot ("we," "us," or "our") collects, uses, stores, and protects information obtained through the One Bot Discord service (the "Service"). By accessing or using the Service, you ("User" or "you") agree to the collection and use of your information in accordance with this Policy.
 
