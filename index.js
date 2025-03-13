@@ -7,9 +7,7 @@ fs = require('fs'),
 Logger = require("./src/modules/Logger"),
 MongStarboardsManager = require("./src/modules/StarboardsManager"),
 { Player } = require("discord-player"),
-{ 
-  DefaultExtractors
-} = require("@discord-player/extractor");
+{ DefaultExtractors } = require("@discord-player/extractor");
 
 
 const client = new Client({

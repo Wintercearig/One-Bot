@@ -14,7 +14,7 @@ module.exports = {
         }
 
         // ✅ Fetch User Flags & Badges
-        await user.fetchFlags();
+        await user.fetch();
         const userFlags = new UserFlagsBitField(user.flags.bitfield);
 
         // ✅ Discord Profile Badges & Emojis
@@ -87,7 +87,6 @@ module.exports = {
         // ✅ Nitro Subscription Calculation
         const boostDate = member.premiumSince;
         console.log(member);
-        console.log(member.premiumSince);
         let boostInfo = 'N/A';
         let nitroBadge = '';
         let boostEmoji = '';

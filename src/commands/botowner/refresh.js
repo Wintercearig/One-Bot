@@ -178,8 +178,10 @@ function refreshCommand(client, message, commandName, isSlashCommand) {
   }
 
   try {
-    delete require.cache[require.resolve(matchingFile)];
-    const newCommand = require(matchingFile);
+    // Convert to an absolute path to ensure Node can find it
+    const resolvedFile = path.resolve(matchingFile);
+    delete require.cache[require.resolve(resolvedFile)];
+    const newCommand = require(resolvedFile);
     
     if (isSlashCommand) {
       client.slash.set(newCommand.data.name, newCommand);
