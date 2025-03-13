@@ -13,6 +13,28 @@ const userSchema = new Schema({
         reason: null,
       },
     },
+    inventory: {
+      type: Array,
+      default: [],
+    },
+    inventoryValue: { type: Number, default: 0, min: 0 },
+    cooldowns: {
+      type: Object,
+      default: {
+        daily: 0,
+        weekly: 0,
+        monthly: 0,
+        yearly: 0,
+        tip: 0,
+        rob: 0,
+        crime: 0,
+        work: 0,
+        fishing: 0,
+        hunting: 0,
+        mining: 0,
+        woodcutting: 0,
+      },  
+    },
     reminder: {
       type: Object,
       default: {
@@ -29,6 +51,7 @@ const userSchema = new Schema({
             // Add more notification types here
         ])
     }
+    blacklisted: { type: Boolean, default: false },
     */
 }, {
   strict: false
