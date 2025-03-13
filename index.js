@@ -6,7 +6,7 @@ const { Client, GatewayIntentBits, Collection, REST, Routes} = require("discord.
 fs = require('fs'),
 Logger = require("./src/modules/Logger"),
 MongStarboardsManager = require("./src/modules/StarboardsManager"),
-{ Player } = require('discord-player'),
+{ Player } = require("discord-player"),
 { 
   YouTubeExtractor, 
   SpotifyExtractor, 
