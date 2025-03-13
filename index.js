@@ -8,13 +8,7 @@ Logger = require("./src/modules/Logger"),
 MongStarboardsManager = require("./src/modules/StarboardsManager"),
 { Player } = require("discord-player"),
 { 
-  YouTubeExtractor, 
-  SpotifyExtractor, 
-  SoundCloudExtractor, 
-  AppleMusicExtractor, 
-  VimeoExtractor, 
-  AttachmentExtractor, 
-  ReverbnationExtractor 
+  DefaultExtractors
 } = require("@discord-player/extractor");
 
 
@@ -27,7 +21,7 @@ const client = new Client({
       GatewayIntentBits.GuildPresences,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.GuildModeration,
-      GatewayIntentBits.GuildEmojisAndStickers,
+      GatewayIntentBits.GuildExpressions,
       GatewayIntentBits.GuildWebhooks,
       GatewayIntentBits.GuildInvites,
       GatewayIntentBits.GuildVoiceStates,
@@ -49,13 +43,8 @@ client.player = new Player(client, {
 });
 
 client.player.extractors.unregisterAll();
-client.player.extractors.register(YouTubeExtractor, {});
-client.player.extractors.register(SpotifyExtractor, {});
-client.player.extractors.register(SoundCloudExtractor, {});
-client.player.extractors.register(AppleMusicExtractor, {});
-client.player.extractors.register(VimeoExtractor, {});
-client.player.extractors.register(ReverbnationExtractor, {});
-client.player.extractors.register(AttachmentExtractor, {});
+client.player.extractors.register(DefaultExtractors, {});
+
 /*
  * This makes it easier to use functions without having to require it from functions.js. 
  * Use client.<func>(args)

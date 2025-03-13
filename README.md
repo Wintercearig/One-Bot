@@ -7,13 +7,18 @@
 
 3- Pull from Main into Your_Branch periodically to stay up to date with Main Branch
 -----------------------------------------------------------------------------------------------------
-[node-fetch] -
+[got] -
 const headers = {
-      'User-Agent': 'YourApp/0.1 by YourRedditUsername'
-    };
-    fetch('https://www.reddit.com/r/memes/random/.json', { headers })
-    .then(response => response.json())
-node-fetch is hell. 'got' npm is the way to go. it's simpler, easier to use, and faster (in my opinion)
+  'User-Agent': 'YourApp/0.1 by YourRedditUsername'
+};
+
+got('https://www.reddit.com/r/memes/random/.json', { headers, responseType: 'json' })
+  .then(response => {
+    console.log(response.body);
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
 
 [Discord-Opus] - To install discord opus, ensure python, nodejs, npm (node package manager), and most importantly, "Desktop Development with c++" Workload from Visual Studio 2022 or newer is installed, or else it will not install.
 
