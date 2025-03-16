@@ -1,3 +1,5 @@
+These are mainly notes to myself, however since this bot is in github, feel free to brows through my inner most thoughts.
+
 # GITHUB
 [![CodeFactor](https://www.codefactor.io/repository/github/wintercearig/one-bot/badge/main)](https://www.codefactor.io/repository/github/wintercearig/one-bot/overview/main)
 
@@ -7,6 +9,10 @@
 
 3- Pull from Main into Your_Branch periodically to stay up to date with Main Branch
 -----------------------------------------------------------------------------------------------------
+KNOWN BUGS:
+- help command throws an error if command is sent in another channel after its already been thrown Perhaps consider allowing multiple collectors? Need to reason
+- music area needs to be fine tuned before production ready
+
 [got] -
 const headers = {
   'User-Agent': 'YourApp/0.1 by YourRedditUsername'
@@ -32,33 +38,33 @@ https://discord.com/developers/docs/reference
 id	Indonesian	        Bahasa Indonesia
 da	Danish	                Dansk
 de	German	                Deutsch
-en-GB	English, UK	        English, UK
-en-US	English, US	        English, US
-es-ES	Spanish	                Español
+en-GB	English, UK	          English, UK
+en-US	English, US	          English, US
+es-ES	Spanish	              Español
 fr	French	                Français
-hr	Croatian	        Hrvatski
+hr	Croatian	              Hrvatski
 it	Italian	                Italiano
-lt	Lithuanian	        Lietuviškai
-hu	Hungarian	        Magyar
-nl	Dutch	                Nederlands
-no	Norwegian	        Norsk
+lt	Lithuanian	            Lietuviškai
+hu	Hungarian	              Magyar
+nl	Dutch	                  Nederlands
+no	Norwegian	              Norsk
 pl	Polish	                Polski
 pt-BR	Portuguese, Brazilian	Português do Brasil
 ro	Romanian, Romania	Română
 fi	Finnish	                Suomi
-sv-SE	Swedish	                Svenska
-vi	Vietnamese	        Tiếng Việt
+sv-SE	Swedish	              Svenska
+vi	Vietnamese	            Tiếng Việt
 tr	Turkish	                Türkçe
-cs	Czech	                Čeština
-el	Greek	                Ελληνικά
-bg	Bulgarian	        български
+cs	Czech	                  Čeština
+el	Greek	                  Ελληνικά
+bg	Bulgarian	              български
 ru	Russian	                Pусский
-uk	Ukrainian	        Українська
-hi	Hindi	                हिन्दी
-th	Thai	                ไทย
-zh-CN	Chinese, China	        中文
-ja	Japanese	        日本語
-zh-TW	Chinese, Taiwan	        繁體中文
+uk	Ukrainian	              Українська
+hi	Hindi	                  हिन्दी
+th	Thai	                  ไทย
+zh-CN	Chinese, China	      中文
+ja	Japanese	              日本語
+zh-TW	Chinese, Taiwan	      繁體中文
 ko	Korean	                한국어
 
 .setNameLocalizations({

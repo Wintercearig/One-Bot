@@ -11,6 +11,10 @@ module.exports = async (client, interaction) => {
 // SL.data.name
 // SL.data.description
 
+  if (!SL) return;
+  if (!interaction.guild || !interaction.guild.available) return;
+  if (interaction.user.bot) return;
+
   if (client.slash.has(commandName)) {
       try {
           await SL.execute(interaction);

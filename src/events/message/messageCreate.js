@@ -2,17 +2,31 @@
 // eslint-disable-next-line no-unused-vars
 require('dotenv').config();
 const { EmbedBuilder, PermissionsBitField } = require("discord.js"),
-BotModel = require('../../../models/Bot.model'),
-UserModel = require('../../../models/User.model'),
-Guild = require('../../../models/Guild.model');
+BotModel = require('../../../models/Bot.model');
 
 module.exports = async (client, message) => {
 	const guildId = message.guild.id;
 	const userId = message.author.id;
-	// Checks if guild exists, else adds to database
-	const guild = await client.getGuildById(guildId); 
-    let guildData = await Guild.findOne({ guildId: guildId });
-	const customPerms = guildData?.customPerms || {};
+	if (message.author.bot) return;
+	if (!message.guild) return;
+	
+	// Checks if guild and user exists, else adds to database. Also populates the user and guild objects.
+	const guild = await client.getGuildById(guildId);
+	const {user}  = await client.getUserById(userId);
+
+	// If the level or xp fields are missing, initialize them.
+	if (user.level === undefined || user.xp === undefined) {
+		await client.updateUserById(userId, { level: 1, xp: 0 });
+	  }
+
+	  console.log(client.xpRequired(user.level));
+	  const xpNeeded = client.remainingXP(user);
+	  console.log(`You need ${xpNeeded} XP to reach the next level.`);
+
+	  if (user.level < 100) {
+		await client.handleMessageXP(client, message);
+	  }
+	const customPerms = guild?.customPerms || {};
 
 	if (message.content === `<@${client.user.id}>`) {
 
@@ -50,10 +64,8 @@ module.exports = async (client, message) => {
 	const cmd =
 		client.commands.get(command) ||
 		client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(command));
-
-	if (!cmd) return;
 		
-	if (client.commands.has(cmd.name)) {
+		if (!cmd) return;
 
 		await BotModel.updateOne(
 			{ bot_id: client.user.id },
@@ -61,12 +73,13 @@ module.exports = async (client, message) => {
 			{ upsert: true }
 		);
 
-		if (cmd.ownerOnly && !process.env.owners.includes(message.author.id)) {
-			return message.reply(
-				'This command can only be used by the bot owners!'
-			);
+		// Checks if user is a bot owner
+		const owners = process.env.owners.split(',');
+		if (cmd.ownerOnly && !owners.includes(message.author.id)) {
+			return message.reply('This command can only be used by the bot owners!');
 		}
 
+		// Check require args
 		if (cmd.requiredArgs && args.length < cmd.requiredArgs.length) {
 			const cmdArgs = cmd.requiredArgs.map(a => `\`${a}\``).join(', ');
 			const cmdExample = `${prefix}${cmd.name} ${cmd.requiredArgs
@@ -77,11 +90,13 @@ module.exports = async (client, message) => {
 				.setTitle('Incorrect command usage')
 				.setColor('RED')
 				.setDescription(`:x: | You must provide more args: ${cmdArgs}`)
-				.addField('Example:', cmdExample);
+				.addFields([{ name: 'Example:', value: cmdExample }]);
 
 			return message.channel.send({ embeds: [embed]});
 		}
-		if (cmd.botPermissions && !message.guild.members.me.permissions.has('Administrator')) {
+
+		// Check bot permissions
+		if (cmd.botPermissions && !message.guild.members.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
 			const neededPermissions = [];
 		
 			if (message.guild && message.channel) {
@@ -101,7 +116,7 @@ module.exports = async (client, message) => {
 			}
 		}
 		
-		// Custom Perms are user defined permissions. More functionality, but also more dangerous.
+		// Custom Perms (user-defined)
 		if (cmd.customPerms) {
 			const userPermissions = message.member.permissions,
 			hasPermissions = customPerms[cmd.name].filter(perm => userPermissions.has(PermissionsBitField.Flags[perm])),
@@ -146,20 +161,10 @@ module.exports = async (client, message) => {
 		}
 
 		if (cmd.nsfwOnly && !message.channel.nsfw) {
-			const embed = new EmbedBuilder()
-				.setTitle('Restricted Command')
-				.setDescription('This channel is SFW! Please use this command in an NSFW channel.')
-				.setColor('RED')
-				.setTimestamp();
-			return message.channel.send({ embeds: [embed] }).then(m => {
-				setTimeout(() => {
-					m.delete().catch(console.error);
-				}, 10000); 
+			return message.channel.send({
+			  content: "This command can only be used in an NSFW channel."
 			});
 		}
 		
 		cmd.run(client, message, args);
-	} else {
-		return;
-	}
 };

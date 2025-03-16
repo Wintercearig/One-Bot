@@ -186,16 +186,15 @@ async function addUser(userId) {
 async function updateUserById(userId, data) {
   try {
     if (typeof data !== "object") {
-      throw Error("'data' must be an object");
+      throw new Error("'data' must be an object");
     }
-
-    const user = await getUserById(userId);
-
-    if (!user) {
-      await addUser(userId);
-    }
-
-    await User.findOneAndUpdate({ user_id: userId }, data);
+    
+    const updatedUser = await User.findOneAndUpdate(
+      { user_id: userId },
+      { $set: data },
+      { new: true, upsert: true }
+    );
+    return updatedUser;
   } catch (e) {
     console.error(e);
   }
@@ -251,15 +250,13 @@ async function updateUserNotifs(userId, notifType, isEnabled) {
     if (!user) {
       const newUser = new User({
         user_id: userId,
-        notifications: [
-          normalizedNotifType
-        ]
+        notifications: normalizedNotifType
       });
       await newUser.save();
 
     } else {
       if (isEnabled) {
-        update = { $addToSet: { notifications: [normalizedNotifType] } };
+        update = { $addToSet: { notifications: normalizedNotifType } };
       } else {
         update = { $pull: { notifications: normalizedNotifType } };
       }
@@ -384,8 +381,6 @@ async function getGuildLang(guildId) {
 }
 
 const toCapitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
-
-const calculateUserXp = (xp) => Math.floor(0.1 * Math.sqrt(xp));
 
 function getLanguages() {
   return fs
@@ -555,39 +550,39 @@ function encode(obj) {
 */
 
 module.exports = {
-  errorEmbed,
-  getTrackInfo,
-  getCategoryDescription,
-  toCapitalize,
-  calculateUserXp,
-  getUserById,
-  checkUserPermissions,
+  addCase,
   addGuild,
   addUser,
-  removeUser,
-  updateUserById,
-  getGuildById,
-  updateGuildById,
-  updateUserNotifs,
-  sendBotUpdates,
-  removeGuild,
   addWarning,
-  removeUserWarnings,
-  findMember,
-  getGuildLang,
-  getLanguages,
-  // handleApiRequest,
-  parseMessage,
-  createWebhook,
-  getWebhook,
-  escapeMarkdown,
-  findOrCreateMutedRole,
-  updateMuteChannelPerms,
+  checkUserPermissions,
   // checkAuth,
-  formatNumber,
   createStarboard,
+  createWebhook,
+  //encode,
+  errorEmbed,
+  escapeMarkdown,
+  findMember,
+  findOrCreateMutedRole,
   findRole,
   formattedDate,
-  addCase,
-  getLatestCaseNumber
+  formatNumber,
+  getCategoryDescription,
+  getGuildById,
+  getGuildLang,
+  getLanguages,
+  getLatestCaseNumber,
+  getTrackInfo,
+  getUserById,
+  getWebhook,
+  // handleApiRequest,
+  parseMessage,
+  removeGuild,
+  removeUser,
+  removeUserWarnings,
+  sendBotUpdates,
+  toCapitalize,
+  updateGuildById,
+  updateMuteChannelPerms,
+  updateUserById,
+  updateUserNotifs
 };

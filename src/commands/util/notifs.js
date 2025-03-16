@@ -10,7 +10,6 @@ const allNotifs = [
 
 // Function to normalize notification types for comparison
 const normalize = (str) => str.toLowerCase().replace(/\s/g, '');
-
 module.exports = {
   name: "notifs",
   description: "Returns your notifs config",
@@ -44,7 +43,13 @@ module.exports = {
       message.channel.send(`Notification '${args[1]}' has been ${isEnabled ? 'enabled' : 'disabled'}.`);
     } else {
       const user = await User.findOne({ user_id: userId });
-      const userNotifs = user?.notifications ?? [];
+      let userNotifs = user?.notifications ?? [];
+
+      if (user && (!user.notifications || user.notifications.length === 0)) {
+        await User.findOneAndUpdate({ user_id: userId }, { $unset: { notifications: 1 } });
+        // Set userNotifs to an empty array for display purposes.
+        userNotifs = [];
+      }
 
       const embed = new EmbedBuilder()
         .setTitle('Your Notification Settings')

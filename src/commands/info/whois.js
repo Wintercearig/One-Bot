@@ -8,7 +8,7 @@ module.exports = {
     usage: `whois [user's tag]`,
     run: async (client, message) => {
         const user = message.mentions.users.first() || message.author;
-        const member = message.guild.members.cache.get(user.id);
+        const member = await message.guild.members.fetch(user.id);
         if (!member) {
             return message.channel.send('User not found in this server.');
         }
@@ -49,70 +49,6 @@ module.exports = {
         const userStatus = member.presence?.status || "offline";
         const statusEmoji = statusIcons[userStatus];
 
-        // ✅ Nitro Subscription Tiers
-        const nitroTiers = [
-            { months: 1, badge: "🟫 **Bronze**" },
-            { months: 3, badge: "⚪ **Silver**" },
-            { months: 6, badge: "🟡 **Gold**" },
-            { months: 12, badge: "🔷 **Platinum**" },
-            { months: 24, badge: "💎 **Diamond**" },
-            { months: 36, badge: "🍀 **Emerald**" },
-            { months: 60, badge: "❤️ **Ruby**" },
-            { months: 72, badge: "🔮 **Opal**" }
-        ];
-
-        // ✅ Nitro Boost Emojis
-        let boostEmojis = [
-            '<:Nitro_1_Month:1161997354304536666>',
-            '<:Nitro_2_Months:1161997366967144498>',
-            '<:Nitro_3_Months:1161997378195304528>',
-            '<:Nitro_3_Months:1161997378195304528>',
-            '<:Nitro_3_Months:1161997378195304528>',
-            '<:Nitro_6_Months:1161997390165852251>',
-            '<:Nitro_6_Months:1161997390165852251>',
-            '<:Nitro_6_Months:1161997390165852251>',
-            '<:Nitro_9_Months:1161997408004214784>',
-            '<:Nitro_9_Months:1161997408004214784>',
-            '<:Nitro_9_Months:1161997408004214784>',
-            '<:Nitro_12_Months:1161997419689541672>',
-            '<:Nitro_12_Months:1161997419689541672>',
-            '<:Nitro_12_Months:1161997419689541672>',
-            '<:Nitro_15_Months:1161997430032703529>',
-            '<:Nitro_15_Months:1161997430032703529>',
-            '<:Nitro_15_Months:1161997430032703529>',
-            '<:Nitro_18_Months:1161997445220274176>',
-            '<:Nitro_24_Months:1161997495933620344>'
-        ];
-
-        // ✅ Nitro Subscription Calculation
-        const boostDate = member.premiumSince;
-        console.log(member);
-        let boostInfo = 'N/A';
-        let nitroBadge = '';
-        let boostEmoji = '';
-
-        if (boostDate) {
-            const currentDate = new Date();
-            const boostDateStart = new Date(boostDate);
-            const totalMonths = (currentDate.getMonth() - boostDateStart.getMonth()) + (12 * (currentDate.getFullYear() - boostDateStart.getFullYear()));
-
-            boostInfo = `(${totalMonths} month${totalMonths !== 1 ? 's' : ''})`;
-
-            // Assign Nitro Badge (Bronze, Silver, etc.)
-            for (const tier of nitroTiers.reverse()) {
-                if (totalMonths >= tier.months) {
-                    nitroBadge = tier.badge;
-                    break;
-                }
-            }
-
-            // Assign Boost Emoji
-            boostEmoji = boostEmojis[Math.min(totalMonths - 1, boostEmojis.length - 1)] || '';
-
-            // Combine Boost Emoji & Nitro Badge
-            boostInfo = `${boostEmoji} ${nitroBadge} ${boostInfo}`;
-        }
-
         // ✅ Embed Construction
         const uinfoembed = new EmbedBuilder()
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 512 }))
@@ -127,10 +63,6 @@ module.exports = {
                 { name: `Badges`, value: userBadges, inline: false },
                 { name: `Member Since`, value: `<:Discord_Logo:1162118477084098600> ${user.createdAt.toDateString()} • :earth_americas: ${member.joinedAt.toDateString()}` }
             );
-
-        if (!member.user.bot) {
-            uinfoembed.addFields({ name: `Nitro Subscription`, value: boostInfo, inline: true });
-        }
 
         message.channel.send({ embeds: [uinfoembed] }).catch(console.error);
     }
