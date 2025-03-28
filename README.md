@@ -1,4 +1,4 @@
-These are mainly notes to myself, however since this bot is in github, feel free to brows through my inner most thoughts.
+These are mainly notes to myself, however since this bot is in github, feel free to browse through my inner most thoughts.
 
 # GITHUB
 [![CodeFactor](https://www.codefactor.io/repository/github/wintercearig/one-bot/badge/main)](https://www.codefactor.io/repository/github/wintercearig/one-bot/overview/main)
