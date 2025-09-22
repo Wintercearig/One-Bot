@@ -1,6 +1,6 @@
 /* eslint-disable node/no-extraneous-require */
 require('dotenv').config();
-
+// A few things ought to be changed here. Specifically the extremely long and redundant way to retrieve the functions stored in src/utils
 const { Client, GatewayIntentBits, Collection, REST, Routes} = require("discord.js"),
 { connect, connection } = require("mongoose"),
 fs = require('fs'),
