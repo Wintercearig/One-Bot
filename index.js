@@ -1,13 +1,7 @@
 /* eslint-disable node/no-extraneous-require */
 require('dotenv').config();
 // A few things ought to be changed here. Specifically the extremely long and redundant way to retrieve the functions stored in src/utils
-const { Client, GatewayIntentBits, Collection, REST, Routes} = require("discord.js"),
-{ connect, connection } = require("mongoose"),
-fs = require('fs'),
-Logger = require("./src/modules/Logger"),
-MongStarboardsManager = require("./src/modules/StarboardsManager"),
-{ Player } = require("discord-player"),
-{ DefaultExtractors } = require("@discord-player/extractor");
+const { Client, GatewayIntentBits, Collection, REST} = require("discord.js");
 
 // Check notifications in mongoDB. fix later
 
@@ -31,121 +25,6 @@ const client = new Client({
   sweepers: true,
 });
 
-// entrypoint for discord-player based application
-client.player = new Player(client, {
-  skipFFmpeg: false,
-  ytdlOptions: {
-      quality: 'highestaudio',
-      filter: 'audioonly',
-      highWaterMark: 1 << 25
-  },
-});
-
-client.player.extractors.unregisterAll();
-client.player.extractors.register(DefaultExtractors, {});
-
-/*
- * This makes it easier to use functions without having to require it from functions.js. 
- * Use client.<func>(args)
- */
-
-const {
-  addCase,
-  addGuild,
-  addUser,
-  addWarning,
-  checkUserPermissions,
-  // checkAuth,
-  createStarboard,
-  createWebhook,
-  //encode,
-  errorEmbed,
-  escapeMarkdown,
-  findMember,
-  findOrCreateMutedRole,
-  findRole,
-  formattedDate,
-  formatNumber,
-  getCategoryDescription,
-  getGuildById,
-  getGuildLang,
-  getLanguages,
-  getLatestCaseNumber,
-  getTrackInfo,
-  getUserById,
-  getWebhook,
-  // handleApiRequest,
-  parseMessage,
-  removeGuild,
-  removeUser,
-  removeUserWarnings,
-  sendBotUpdates,
-  toCapitalize,
-  updateGuildById,
-  updateMuteChannelPerms,
-  updateUserById,
-  updateUserNotifs, 
-} = require('./src/utils/functions');
-
-[
-  addCase,
-  addGuild,
-  addUser,
-  addWarning,
-  checkUserPermissions,
-  // checkAuth,
-  createStarboard,
-  createWebhook,
-  //encode,
-  errorEmbed,
-  escapeMarkdown,
-  findMember,
-  findOrCreateMutedRole,
-  findRole,
-  formattedDate,
-  formatNumber,
-  getCategoryDescription,
-  getGuildById,
-  getGuildLang,
-  getLanguages,
-  getLatestCaseNumber,
-  getTrackInfo,
-  getUserById,
-  getWebhook,
-  // handleApiRequest,
-  parseMessage,
-  removeGuild,
-  removeUser,
-  removeUserWarnings,
-  sendBotUpdates,
-  toCapitalize,
-  updateGuildById,
-  updateMuteChannelPerms,
-  updateUserById,
-  updateUserNotifs
-].forEach((func) => {
-  client[func.name] = func;
-});
-
-// Leveling system
-const {
-  xpRequired,
-  calculateXP,
-  addXP,
-  handleMessageXP,
-  remainingXP
-} = require('./src/utils/leveling');
-
-[
-  xpRequired,
-  calculateXP,
-  addXP,
-  handleMessageXP,
-  remainingXP
-].forEach(func => {
-  client[func.name] = func;
-});
-
 process.on("unhandledRejection", (error) => {
   console.error("Unhandled Promise Rejection:", error);
 });
@@ -158,21 +37,11 @@ process.on("rejectionHandled", (promise) => {
   console.log("Promise rejection handled:", promise);
 });
 
-client.commands = new Collection();
 client.slash = new Collection();
-client.cooldowns = new Collection();
 client.events = new Collection();
-client.aliases = new Collection();
-client.afk = new Map();
-// Saves music session event discord message ID's, to actively clean message id's
-client.musicSessionStates = new Map();
 
-client.categories = fs.readdirSync('./src/commands/');
 client.slashCategories = fs.readdirSync('./src/slashCommands/');
-client.logger = Logger;
-client.starboardsManager = new MongStarboardsManager(client, {
-	storage: false,
-});
+
 
 require("./handlers/commands")(client);
 require("./handlers/events")(client);
